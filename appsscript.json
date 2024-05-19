@@ -1,0 +1,14 @@
+// 在 Google Apps Script 中的 appsscript.json 檔案中
+{
+  "timeZone": "Asia/Taipei",
+  "dependencies": {
+  },
+  "webapp": {
+    "access": "ANYONE_ANONYMOUS",
+    "executeAs": "USER_ACCESSING"
+  },
+  "exceptionSettings": {
+    "successRedirect": "",
+    "errorRedirect": ""
+  }
+}
