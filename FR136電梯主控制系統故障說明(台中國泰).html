@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FR136電梯控制系統故障碼查詢系統</title>
+    <style>
+        /* 保持之前的CSS樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .search-btn, .clear-btn, .export-btn {
+            padding: 12px 25px;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        
+        .clear-btn {
+            background: #e74c3c;
+        }
+        
+        .export-btn {
+            background: #27ae60;
+        }
+        
+        .search-btn:hover, .clear-btn:hover, .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .filter-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .filter-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .circuit-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .circuit-card {
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .circuit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .circuit-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .circuit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-color: #3498db;
+        }
+        
+        .circuit-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .circuit-card .page-ref {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+        
+        .circuit-card .error-count {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .error-results {
+            margin-top: 30px;
+        }
+        
+        .error-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .error-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+        }
+        
+        .error-header {
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .error-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .error-code {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .error-level {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+        
+        .error-body {
+            padding: 25px;
+        }
+        
+        .error-description {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        
+        .circuit-info {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            position: relative;
+        }
+        
+        .circuit-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #3498db, #2980b9);
+        }
+        
+        .circuit-info h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .component-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .component-tag {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+            transition: transform 0.2s ease;
+        }
+        
+        .component-tag:hover {
+            transform: translateY(-1px);
+        }
+        
+        .solution {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .solution::before {
+            content: '🛠️';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: #28a745;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .solution h4 {
+            color: #155724;
+            margin-bottom: 15px;
+            margin-left: 20px;
+        }
+        
+        .solution ul {
+            margin-left: 40px;
+            color: #155724;
+        }
+        
+        .solution li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px;
+            color: #6c757d;
+            font-size: 1.3em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .pagination button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination button:hover {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .pagination button.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .export-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .troubleshooting-guide {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .troubleshooting-guide h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        .troubleshooting-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .troubleshooting-step {
+            background: rgba(255,255,255,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .troubleshooting-step h4 {
+            color: #d68910;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .search-container, .filter-section {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .circuit-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 電梯控制系統故障碼查詢系統</h1>
+            <p>K-MC8000高速梯控制系統 - 完整故障診斷與控制迴路對應</p>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="輸入故障碼 (例: Er.030, 030, 安全回路, 抱閘)">
+                <button onclick="searchError()" class="search-btn">🔍 查詢</button>
+                <button onclick="clearSearch()" class="clear-btn">🗑️ 清除</button>
+                <button onclick="exportResults()" class="export-btn">📄 匯出</button>
+            </div>
+            
+            <div class="filter-section">
+                <button class="filter-btn" onclick="filterByLevel('all')">全部故障</button>
+                <button class="filter-btn" onclick="filterByLevel(1)">1級故障</button>
+                <button class="filter-btn" onclick="filterByLevel(2)">2級故障</button>
+                <button class="filter-btn" onclick="filterByLevel(3)">3級故障</button>
+                <button class="filter-btn" onclick="filterByLevel(4)">4級故障</button>
+                <button class="filter-btn" onclick="filterByLevel(5)">5級故障</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalErrors">85+</div>
+                    <div class="stat-label">故障代碼</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">主要控制迴路</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">故障等級</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">43</div>
+                    <div class="stat-label">電氣圖頁數</div>
+                </div>
+            </div>
+            
+            <h2 style="margin-bottom: 20px; color: #2c3e50;">📋 控制迴路總覽</h2>
+            <div class="circuit-overview">
+                <div class="circuit-card" onclick="showCircuitErrors('安全回路')">
+                    <div class="error-count" id="safetyCount">15</div>
+                    <h3>🛡️ 安全回路 <span class="page-ref">頁10</span></h3>
+                    <p><strong>主要元件：</strong> JY, KMB, EEO, JF, JFS/JFX, 各安全開關</p>
+                    <p><strong>功能：</strong> 監控電梯所有安全條件，確保運行安全</p>
+                    <p><strong>典型故障：</strong> Er.030(安全回路斷開), Er.031(門鎖脫開), Er.032(門鎖短接)</p>
+                </div>
+                
+                <div class="circuit-card" onclick="showCircuitErrors('抱閘回路')">
+                    <div class="error-count" id="brakeCount">12</div>
+                    <h3>🔒 抱閘回路 <span class="page-ref">頁11</span></h3>
+                    <p><strong>主要元件：</strong> KZD, KZD3, BZK1/BZK2, DZZ1/DZZ2</p>
+                    <p><strong>功能：</strong> 控制電梯抱閘的打開與關閉，防止溜車</p>
+                    <p><strong>典型故障：</strong> Er.050-055(抱閘動作超時), Er.029(UCMP故障)</p>
+                </div>
+                
+                <div class="circuit-card" onclick="showCircuitErrors('檢修回路')">
+                    <div class="error-count" id="inspectionCount">5</div>
+                    <h3>🔧 檢修回路 <span class="page-ref">頁12</span></h3>
+                    <p><strong>主要元件：</strong> JF, JFS, JFX, ZD, AYS/AYX</p>
+                    <p><strong>功能：</strong> 提供檢修狀態下的手動控制功能</p>
+                    <p><strong>典型故障：</strong> Er.018(檢修通訊故障), Er.110-113(檢修超速)</p>
+                </div>
+                
+                <div class="circuit-card" onclick="showCircuitErrors('驅動系統')">
+                    <div class="error-count" id="driveCount">18</div>
+                    <h3>⚡ 驅動系統 <span class="page-ref">頁5</span></h3>
+                    <p><strong>主要元件：</strong> U3(AFE), U4(KEB F5), K1-K4, WY1</p>
+                    <p><strong>功能：</strong> 電機驅動與速度控制，提供運行動力</p>
+                    <p><strong>典型故障：</strong> Er.003(驅動未準備), Er.004(運行故障), Er.016(通訊異常)</p>
+                </div>
+                
+                <div class="circuit-card" onclick="showCircuitErrors('編碼器系統')">
+                    <div class="error-count" id="encoderCount">8</div>
+                    <h3>📡 編碼器系統 <span class="page-ref">頁7</span></h3>
+                    <p><strong>主要元件：</strong> 海德漢1313編碼器, 高速計數模組</p>
+                    <p><strong>功能：</strong> 位置與速度反饋，精確控制電梯運行</p>
+                    <p><strong>典型故障：</strong> Er.005(編碼器斷線), Er.006(編碼器反向)</p>
+                </div>
+                
+                <div class="circuit-card" onclick="showCircuitErrors('通訊系統')">
+                    <div class="error-count" id="commCount">10</div>
+                    <h3>📶 通訊系統 <span class="page-ref">頁13</span></h3>
+                    <p><strong>主要元件：</strong> CAN通訊線路, ELGO通訊, 各控制板</p>
+                    <p><strong>功能：</strong> 各控制單元間數據通訊與協調</p>
+                    <p><strong>典型故障：</strong> Er.011(轎頂通訊), Er.017(轎廂通訊), Er.019(ELGO通訊)</p>
+                </div>
+                
+                <div class="circuit-card" onclick="showCircuitErrors('門機系統')">
+                    <div class="error-count" id="doorCount">8</div>
+                    <h3>🚪 門機系統 <span class="page-ref">頁19</span></h3>
+                    <p><strong>主要元件：</strong> 變頻門機, 光幕, 開關門限位, 門鎖</p>
+                    <p><strong>功能：</strong> 控制轎門和廳門的開關動作</p>
+                    <p><strong>典型故障：</strong> Er.060(開門故障), Er.061(關門故障), Er.062(限位同動)</p>
+                </div>
+                
+                <div class="circuit-card" onclick="showCircuitErrors('照明回路')">
+                    <div class="error-count" id="lightCount">3</div>
+                    <h3>💡 照明回路 <span class="page-ref">頁16</span></h3>
+                    <p><strong>主要元件：</strong> GM1(照明開關), 照明電源, 應急照明</p>
+                    <p><strong>功能：</strong> 提供轎廂、井道照明及應急照明</p>
+                    <p><strong>典型故障：</strong> 照明電源故障, 應急照明失效</p>
+                </div>
+            </div>
+            
+            <div class="troubleshooting-guide">
+                <h3>🔍 故障排查指南</h3>
+                <p>根據故障等級進行系統性排查，確保電梯安全運行</p>
+                <div class="troubleshooting-steps">
+                    <div class="troubleshooting-step">
+                        <h4>第一步：安全檢查</h4>
+                        <p>確認安全回路完整性，檢查所有安全開關狀態</p>
+                    </div>
+                    <div class="troubleshooting-step">
+                        <h4>第二步：電源檢查</h4>
+                        <p>檢查主電源、控制電源、通訊電源是否正常</p>
+                    </div>
+                    <div class="troubleshooting-step">
+                        <h4>第三步：通訊檢查</h4>
+                        <p>檢查各控制板間CAN通訊是否正常</p>
+                    </div>
+                    <div class="troubleshooting-step">
+                        <h4>第四步：機械檢查</h4>
+                        <p>檢查抱閘、門機、編碼器等機械部件</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="errorResults" class="error-results"></div>
+            <div id="pagination" class="pagination"></div>
+        </div>
+    </div>
+
+    <script>
+        // 完整的故障碼資料庫
+        const errorDatabase = {
+            // 輸入輸出故障 (Er.001-Er.002)
+            "Er.001": {
+                code: "Er.001",
+                description: "輸入故障 - 多功能輸入點重複定義",
+                level: 5,
+                circuit: "主板輸入",
+                page: "頁13",
+                components: ["K-MC8000主板", "輸入端子"],
+                causes: ["多功能輸入點重複定義"],
+                solutions: ["檢查多功能輸入點端子定義", "重新配置輸入點參數"]
+            },
+            "Er.002": {
+                code: "Er.002", 
+                description: "輸出故障 - 多功能輸出點重複定義",
+                level: 5,
+                circuit: "主板輸出",
+                page: "頁14",
+                components: ["K-MC8000主板", "輸出端子"],
+                causes: ["多功能輸出點重複定義"],
+                solutions: ["檢查多功能輸出點端子定義", "重新配置輸出點參數"]
+            },
+
+            // 驅動系統故障 (Er.003-Er.004, Er.016)
+            "Er.003": {
+                code: "Er.003",
+                description: "驅動未準備好",
+                level: 5,
+                circuit: "驅動系統", 
+                page: "頁5",
+                components: ["U4(KEB F5)", "變頻器參數", "準備好信號端子"],
+                causes: ["變頻器參數設置錯誤", "變頻器有故障", "準備好信號端子定義錯誤", "準備好端子連接錯誤"],
+                solutions: ["檢查變頻器端子定義", "檢查變頻器參數設置", "檢查控制器及變頻器信號邏輯", "檢查控制器準備好端子連線"]
+            },
+            "Er.004": {
+                code: "Er.004",
+                description: "驅動運行故障",
+                level: 5,
+                circuit: "驅動系統",
+                page: "頁5", 
+                components: ["U4(KEB F5)", "TR1/TR2(上下行輸出)", "R2(運行反饋)"],
+                causes: ["控制器輸出上行或下行命令，而變頻器無電流輸出", "控制器未收到R2信號", "變頻器沒有收到運行指令"],
+                solutions: ["檢查變頻器端口設置(使能信號)", "檢查變頻器運行反饋信號定義", "檢查控制器與變頻器輸出連線是否可靠"]
+            },
+            "Er.016": {
+                code: "Er.016",
+                description: "驅動通訊異常",
+                level: 5,
+                circuit: "驅動系統",
+                page: "頁5",
+                components: ["K-MC8000", "U4(KEB F5)", "CAN通訊線路"],
+                causes: ["驅動通訊接觸不良", "參數設置錯誤", "控制板或驅動異常"],
+                solutions: ["檢查通訊線連接或通訊短接針", "檢查驅動參數設置", "更換控制板或驅動"]
+            },
+
+            // 編碼器系統故障 (Er.005-Er.006)
+            "Er.005": {
+                code: "Er.005",
+                description: "編碼器斷線",
+                level: 5,
+                circuit: "編碼器系統",
+                page: "頁7",
+                components: ["海德漢1313編碼器", "編碼器連接線", "K-MC8000高速計數"],
+                causes: ["編碼器損壞或斷線", "抱閘未打開或電機堵轉", "控制器高速計數損壞"],
+                solutions: ["檢查編碼器及連線", "檢查抱閘是否完全打開", "更換控制器", "檢查速度及加減速曲線設置"]
+            },
+            "Er.006": {
+                code: "Er.006",
+                description: "編碼器反向",
+                level: 5,
+                circuit: "編碼器系統",
+                page: "頁7",
+                components: ["海德漢1313編碼器", "A/B相信號線"],
+                causes: ["高速計數A/B相反了", "起動嚴重倒溜", "電梯反向運行"],
+                solutions: ["調換J35的A/B相接線或更改F0.50調換AB相方向", "調整變頻器起動參數", "檢查控制器方向輸出連線是否反向"]
+            },
+
+            // 通訊系統故障 (Er.011, Er.017-Er.019)
+            "Er.011": {
+                code: "Er.011",
+                description: "CAN通訊故障 - 控制器與轎頂控制板不能建立通訊",
+                level: 3,
+                circuit: "通訊系統",
+                page: "頁13",
+                components: ["K-MC8000", "K-CT1000", "CAN通訊線路"],
+                causes: ["隨行電纜的串行通訊電路連線不良", "通訊終端短接針問題", "通訊電源DC24V異常"],
+                solutions: ["檢查隨行電纜的串行通訊電路連線", "檢查主板和轎頂板通訊終端短接針", "檢查通訊電源DC24V", "更換轎頂控制板"]
+            },
+            "Er.017": {
+                code: "Er.017",
+                description: "CAN通訊故障 - 控制器與轎廂控制板不能建立通訊",
+                level: 3,
+                circuit: "通訊系統",
+                page: "頁13",
+                components: ["K-MC8000", "K-CC1000", "CAN通訊線路"],
+                causes: ["轎頂到轎廂連接的扁線接插件不良", "轎廂板通訊終端短接針問題", "通訊電源DC24V異常"],
+                solutions: ["檢查轎頂到轎廂連接的扁線接插件", "檢查轎廂板通訊終端短接針", "檢查通訊電源DC24V", "更換轎廂控制板"]
+            },
+            "Er.018": {
+                code: "Er.018",
+                description: "檢修運行中CAN通訊故障",
+                level: 3,
+                circuit: "檢修回路",
+                page: "頁12",
+                components: ["K-MC8000", "K-CC1000", "檢修通訊"],
+                causes: ["檢修運行中通訊異常"],
+                solutions: ["檢查主板或轎廂板通訊終端短接針", "檢查通訊電源DC24V", "檢查通訊接地", "更換轎廂控制板"]
+            },
+            "Er.019": {
+                code: "Er.019",
+                description: "ELGO通訊故障 - 控制器與SAFEBOX安全盒通訊異常",
+                level: 5,
+                circuit: "通訊系統",
+                page: "頁13",
+                components: ["K-MC8000", "LIMAX33 ELGO", "ELGO通訊線路"],
+                causes: ["ELGO通訊線連接問題", "通訊短接針問題"],
+                solutions: ["檢查通訊線連接或通訊短接針", "更換電梯控制板", "更換SAFEBOX安全盒"]
+            },
+
+            // 安全回路故障 (Er.029-Er.032)
+            "Er.029": {
+                code: "Er.029",
+                description: "UCMP故障 - 轎廂意外移動保護",
+                level: 5,
+                circuit: "抱閘回路",
+                page: "頁11",
+                components: ["BZK1/BZK2(抱閘行程開關)", "LIMAX33安全盒", "鋼絲繩"],
+                causes: ["抱閘行程開關異常", "安全盒平層信號異常", "鋼絲繩打滑引起轎廂滑移"],
+                solutions: ["檢查抱閘行程開關是否有粘連現象", "檢查安全盒平層信號", "檢查鋼絲繩是否有打滑現象", "須檢修復位該故障"]
+            },
+            "Er.030": {
+                code: "Er.030",
+                description: "安全回路斷開",
+                level: 5,
+                circuit: "安全回路",
+                page: "頁10",
+                components: ["JY(安全接觸器)", "各安全開關", "ELGO控制器OC"],
+                causes: ["安全回路斷開", "安全回路繼電器觸點接觸不良", "ELGO控制器OC斷開"],
+                solutions: ["檢查安全回路中各開關", "更換安全回路接觸器", "檢查電梯運行速度是否異常", "檢查ELGO控制器速度配置", "檢查ELGO是否有故障"]
+            },
+            "Er.031": {
+                code: "Er.031",
+                description: "運行中門鎖脫開",
+                level: 5,
+                circuit: "安全回路",
+                page: "頁10",
+                components: ["KMJ/KMT(門鎖)", "KMB(門鎖接觸器)"],
+                causes: ["門刀位置調整不當", "門鎖接觸器觸點接觸不良"],
+                solutions: ["調整門鎖裝置", "更換門鎖接觸器", "檢查門鎖回路"]
+            },
+            "Er.032": {
+                code: "Er.032",
+                description: "門鎖短接故障",
+                level: 5,
+                circuit: "安全回路",
+                page: "頁10",
+                components: ["KMJ/KMT(門鎖)", "開門到位信號"],
+                causes: ["門鎖信號和開門到位信號同時動作", "開門信號輸出5秒後門鎖仍未斷開"],
+                solutions: ["檢查門鎖是否短接", "檢查開門到位開關是否誤動作", "檢查門機裝置是否異常"]
+            },
+
+            // 接觸器故障 (Er.050-Er.055)
+            "Er.050": {
+                code: "Er.050",
+                description: "運行接觸器閉合動作超時",
+                level: 5,
+                circuit: "主板輸出",
+                page: "頁14",
+                components: ["PM1(運行接觸器)", "T9(運行接觸器輸出)"],
+                causes: ["運行接觸器吸合後無反饋"],
+                solutions: ["更換接觸器", "檢查外圍接線", "檢查相應邏輯設定"]
+            },
+            "Er.051": {
+                code: "Er.051",
+                description: "運行接觸器斷開動作超時",
+                level: 5,
+                circuit: "主板輸出",
+                page: "頁14",
+                components: ["PM1(運行接觸器)", "T9(運行接觸器輸出)"],
+                causes: ["運行接觸器釋放後仍有反饋"],
+                solutions: ["更換接觸器", "檢查外圍接線", "檢查相應邏輯設定"]
+            },
+            "Er.052": {
+                code: "Er.052",
+                description: "抱閘接觸器閉合動作超時",
+                level: 5,
+                circuit: "抱閘回路",
+                page: "頁11",
+                components: ["KZD(抱閘接觸器)", "T10(抱閘輸出)"],
+                causes: ["抱閘接觸器吸合後無反饋"],
+                solutions: ["更換接觸器", "檢查外圍接線", "檢查相應邏輯設定"]
+            },
+            "Er.053": {
+                code: "Er.053",
+                description: "抱閘接觸器斷開動作超時",
+                level: 5,
+                circuit: "抱閘回路",
+                page: "頁11",
+                components: ["KZD(抱閘接觸器)", "T10(抱閘輸出)"],
+                causes: ["抱閘接觸器釋放後仍有反饋"],
+                solutions: ["更換接觸器", "檢查外圍接線", "檢查相應邏輯設定"]
+            },
+            "Er.054": {
+                code: "Er.054",
+                description: "抱閘行程動作超時",
+                level: 5,
+                circuit: "抱閘回路",
+                page: "頁11",
+                components: ["BZK1/BZK2(抱閘行程開關)", "抱閘打開裝置"],
+                causes: ["電梯起動時抱閘未完全打開", "電梯停止時抱閘未完全關閉"],
+                solutions: ["檢查抱閘打開裝置", "檢查抱閘行程開關接觸", "檢查相應邏輯設定", "調整抱閘行程開關位置"]
+            },
+            "Er.055": {
+                code: "Er.055",
+                description: "抱閘行程復位超時",
+                level: 5,
+                circuit: "抱閘回路",
+                page: "頁11",
+                components: ["BZK1/BZK2(抱閘行程開關)", "抱閘打開裝置"],
+                causes: ["電梯停止時抱閘未完全關閉", "抱閘行程開關安裝不到位"],
+                solutions: ["檢查抱閘打開裝置", "檢查抱閘行程開關接觸", "檢查相應邏輯設定", "調整抱閘行程開關位置"]
+            },
+
+            // 門機系統故障 (Er.060-Er.065)
+            "Er.060": {
+                code: "Er.060",
+                description: "開門故障 - 電梯開門20秒後未檢測到開門到位信號",
+                level: 2,
+                circuit: "門機系統",
+                page: "頁19",
+                components: ["變頻門機", "T1(開門輸出)", "P3(開門到位)"],
+                causes: ["門機地坎髒污", "門機低速力矩不足", "開門到位開關位置不當"],
+                solutions: ["清理門機地坎", "加大門機低速力矩", "檢查相應邏輯設定", "調整開門到位開關位置"]
+            },
+            "Er.061": {
+                code: "Er.061",
+                description: "關門故障 - 電梯關門10秒後未檢測到關門到位信號",
+                level: 2,
+                circuit: "門機系統",
+                page: "頁19",
+                components: ["變頻門機", "T2(關門輸出)", "P4(關門到位)", "門鎖"],
+                causes: ["關門10秒後未檢測到關門到位信號", "關門已到位而門鎖不通"],
+                solutions: ["清理門機地坎", "加大門機低速力矩", "檢查相應邏輯設定", "調整開關門到位開關位置", "調整門鎖裝置"]
+            },
+            "Er.062": {
+                code: "Er.062",
+                description: "開關門限位同時動作",
+                level: 3,
+                circuit: "門機系統",
+                page: "頁19",
+                components: ["開門限位開關", "關門限位開關"],
+                causes: ["開關門限位開關同時動作", "限位開關安裝位置不當"],
+                solutions: ["檢查開關門限位開關安裝位置", "調整限位開關位置", "更換損壞的限位開關"]
+            },
+            "Er.063": {
+                code: "Er.063",
+                description: "光幕故障",
+                level: 2,
+                circuit: "門機系統",
+                page: "頁19",
+                components: ["光幕裝置", "光幕信號線"],
+                causes: ["光幕裝置故障", "光幕信號線接觸不良"],
+                solutions: ["檢查光幕裝置", "檢查光幕信號線連接", "清潔光幕透鏡", "更換光幕裝置"]
+            },
+
+            // 終端限位故障 (Er.100-Er.101)
+            "Er.100": {
+                code: "Er.100",
+                description: "上終端限位保護 - 轎廂高於頂層地坎很多導致上終端開關動作",
+                level: 5,
+                circuit: "安全回路",
+                page: "頁10",
+                components: ["8KW(上極限開關)", "終端限位開關"],
+                causes: ["轎廂高於頂層地坎很多導致上終端開關動作"],
+                solutions: ["機房打檢修，按回調按鈕+檢修下行按鈕使電梯向下運行脫離上終端開關"]
+            },
+            "Er.101": {
+                code: "Er.101",
+                description: "下終端限位保護 - 轎廂低於底層地坎很多導致下終端開關動作",
+                level: 5,
+                circuit: "安全回路",
+                page: "頁10",
+                components: ["7KW(下極限開關)", "終端限位開關"],
+                causes: ["轎廂低於底層地坎很多導致下終端開關動作"],
+                solutions: ["機房打檢修，按回調按鈕+檢修上行按鈕使電梯向上運行脫離下終端開關"]
+            },
+
+            // 超速保護故障 (Er.108-Er.113)
+            "Er.108": {
+                code: "Er.108",
+                description: "超速保護 - 電梯運行速度大於額定梯速的115%",
+                level: 4,
+                circuit: "編碼器系統",
+                page: "頁7",
+                components: ["海德漢1313編碼器", "LIMAX33安全盒", "速度監控"],
+                causes: ["編碼器速度反饋異常", "參數設置錯誤", "安全盒額定速度配置錯誤"],
+                solutions: ["檢查編碼器速度反饋", "檢查電梯額定速度參數設置", "檢查變頻器參數", "檢查安全盒額定速度配置", "打檢修2次復位故障"]
+            },
+            "Er.109": {
+                code: "Er.109",
+                description: "超速保護 - 電梯運行速度大於額定梯速的130%",
+                level: 4,
+                circuit: "編碼器系統",
+                page: "頁7",
+                components: ["海德漢1313編碼器", "LIMAX33安全盒", "速度監控"],
+                causes: ["編碼器速度反饋異常", "參數設置錯誤", "安全盒額定速度配置錯誤"],
+                solutions: ["檢查編碼器速度反饋", "檢查電梯額定速度參數設置", "檢查變頻器參數", "檢查安全盒額定速度配置", "打檢修2次復位故障"]
+            },
+            "Er.110": {
+                code: "Er.110",
+                description: "檢修超速保護 - 檢修速度大於0.63m/s",
+                level: 4,
+                circuit: "檢修回路",
+                page: "頁12",
+                components: ["檢修開關", "速度監控", "LIMAX33安全盒"],
+                causes: ["檢修狀態下速度過快", "檢修速度參數設置錯誤"],
+                solutions: ["檢查檢修速度設置", "檢查變頻器檢修速度參數", "打檢修2次復位故障"]
+            },
+            "Er.111": {
+                code: "Er.111",
+                description: "檢修超速保護 - 檢修速度大於0.8m/s",
+                level: 4,
+                circuit: "檢修回路",
+                page: "頁12",
+                components: ["檢修開關", "速度監控", "LIMAX33安全盒"],
+                causes: ["檢修狀態下速度過快", "檢修速度參數設置錯誤"],
+                solutions: ["檢查檢修速度設置", "檢查變頻器檢修速度參數", "打檢修2次復位故障"]
+            },
+
+            // 平層系統故障 (Er.120-Er.125)
+            "Er.120": {
+                code: "Er.120",
+                description: "平層感應器故障",
+                level: 3,
+                circuit: "編碼器系統",
+                page: "頁7",
+                components: ["平層感應器", "磁條", "GMG(磁條開關)"],
+                causes: ["平層感應器損壞", "磁條安裝不當", "感應器與磁條距離過大"],
+                solutions: ["檢查平層感應器", "調整磁條位置", "檢查感應器安裝距離", "更換平層感應器"]
+            },
+            "Er.121": {
+                code: "Er.121",
+                description: "平層位置偏差過大",
+                level: 2,
+                circuit: "編碼器系統",
+                page: "頁7",
+                components: ["編碼器", "平層感應器", "控制算法"],
+                causes: ["編碼器精度下降", "平層算法參數不當", "機械磨損"],
+                solutions: ["重新校準編碼器", "調整平層參數", "檢查機械部件磨損", "執行井道自學習"]
+            },
+
+            // 電源系統故障 (Er.130-Er.135)
+            "Er.130": {
+                code: "Er.130",
+                description: "主電源缺相",
+                level: 5,
+                circuit: "電源主回路",
+                page: "頁4",
+                components: ["主電源", "相序保護", "NFB1(主斷路器)"],
+                causes: ["主電源缺相", "相序錯誤", "主斷路器跳閘"],
+                solutions: ["檢查主電源三相電壓", "檢查相序", "檢查主斷路器狀態", "檢查電源接線"]
+            },
+            "Er.131": {
+                code: "Er.131",
+                description: "控制電源故障",
+                level: 5,
+                circuit: "控制電源分配",
+                page: "頁9",
+                components: ["WY2(開關電源)", "WY3(開關電源)", "變壓器BY"],
+                causes: ["開關電源故障", "變壓器故障", "控制電源過載"],
+                solutions: ["檢查開關電源輸出", "檢查變壓器", "檢查控制電源負載", "更換開關電源"]
+            },
+
+            // 溫度保護故障 (Er.140-Er.142)
+            "Er.140": {
+                code: "Er.140",
+                description: "電機過熱保護",
+                level: 4,
+                circuit: "主機主回路",
+                page: "頁7",
+                components: ["電機溫度傳感器", "PTC熱敏電阻", "X3(溫度接口)"],
+                causes: ["電機溫度過高", "溫度傳感器故障", "散熱不良"],
+                solutions: ["檢查電機溫度", "檢查散熱風扇", "檢查溫度傳感器", "降低負載運行"]
+            },
+            "Er.141": {
+                code: "Er.141",
+                description: "變頻器過熱保護",
+                level: 4,
+                circuit: "驅動系統",
+                page: "頁5",
+                components: ["U4(KEB F5)", "散熱風扇", "溫度監控"],
+                causes: ["變頻器溫度過高", "散熱風扇故障", "環境溫度過高"],
+                solutions: ["檢查變頻器散熱", "檢查散熱風扇", "改善通風環境", "降低載頻"]
+            },
+
+            // 負載保護故障 (Er.150-Er.155)
+            "Er.150": {
+                code: "Er.150",
+                description: "電梯超載",
+                level: 2,
+                circuit: "主板輸入",
+                page: "頁13",
+                components: ["稱重裝置", "超載信號", "P16(超載輸入)"],
+                causes: ["轎廢載重超過額定載重", "稱重裝置故障", "超載開關誤動作"],
+                solutions: ["減少載重", "檢查稱重裝置", "調整超載開關", "校準稱重系統"]
+            },
+
+            // 井道學習故障 (Er.160-Er.165)
+            "Er.160": {
+                code: "Er.160",
+                description: "井道自學習失敗",
+                level: 3,
+                circuit: "編碼器系統",
+                page: "頁7",
+                components: ["編碼器", "平層感應器", "終端開關"],
+                causes: ["編碼器信號異常", "平層感應器故障", "井道數據異常"],
+                solutions: ["重新執行井道自學習", "檢查編碼器信號", "檢查平層感應器", "清除井道數據重新學習"]
+            },
+
+            // 外呼系統故障 (Er.170-Er.175)
+            "Er.170": {
+                code: "Er.170",
+                description: "外呼通訊故障",
+                level: 2,
+                circuit: "通訊系統",
+                page: "頁13",
+                components: ["外呼通訊線", "外呼控制板", "CAN通訊"],
+                causes: ["外呼通訊線故障", "外呼板損壞", "通訊參數錯誤"],
+                solutions: ["檢查外呼通訊線", "檢查外呼板", "檢查通訊參數", "更換外呼控制板"]
+            },
+
+            // 消防功能故障 (Er.180-Er.185)
+            "Er.180": {
+                code: "Er.180",
+                description: "消防功能故障",
+                level: 3,
+                circuit: "主板輸入",
+                page: "頁13",
+                components: ["XF1(消防開關)", "消防信號", "P17(消防輸入)"],
+                causes: ["消防開關故障", "消防信號異常", "消防邏輯錯誤"],
+                solutions: ["檢查消防開關", "檢查消防信號線", "檢查消防邏輯設置", "測試消防功能"]
+            }
+        };
+
+        // 全局變量
+        let currentResults = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let currentFilter = 'all';
+
+        // 搜尋功能
+        function searchError() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultsDiv = document.getElementById('errorResults');
+            
+            if (!searchTerm) {
+                resultsDiv.innerHTML = '<div class="no-results">請輸入故障碼進行查詢</div>';
+                return;
+            }
+            
+            currentResults = [];
+            
+            // 搜尋邏輯
+            for (const [key, error] of Object.entries(errorDatabase)) {
+                const code = error.code.toLowerCase();
+                const description = error.description.toLowerCase();
+                const circuit = error.circuit.toLowerCase();
+                const components = error.components.join(' ').toLowerCase();
+                
+                if (code.includes(searchTerm) || 
+                    description.includes(searchTerm) || 
+                    circuit.includes(searchTerm) ||
+                    components.includes(searchTerm) ||
+                    key.toLowerCase().includes(searchTerm) ||
+                    searchTerm.replace('er.', '').replace('.', '') === code.replace('er.', '').replace('.', '')) {
+                    currentResults.push(error);
+                }
+            }
+            
+            currentPage = 1;
+            displayResults(currentResults, `搜尋結果: "${document.getElementById('searchInput').value}"`);
+        }
+
+        // 按迴路顯示故障
+        function showCircuitErrors(circuitType) {
+            currentResults = [];
+            
+            for (const [key, error] of Object.entries(errorDatabase)) {
+                if (error.circuit === circuitType) {
+                    currentResults.push(error);
+                }
+            }
+            
+            currentPage = 1;
+            displayResults(currentResults, `${circuitType}相關故障`);
+        }
+
+        // 按等級過濾
+        function filterByLevel(level) {
+            // 更新過濾按鈕狀態
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            currentFilter = level;
+            
+            if (level === 'all') {
+                currentResults = Object.values(errorDatabase);
+                displayResults(currentResults, '所有故障碼');
+            } else {
+                currentResults = Object.values(errorDatabase).filter(error => error.level === level);
+                displayResults(currentResults, `${level}級故障`);
+            }
+            
+            currentPage = 1;
+        }
+
+        // 顯示結果
+        function displayResults(results, title = '搜尋結果') {
+            const resultsDiv = document.getElementById('errorResults');
+            
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results">😔 未找到相關故障碼</div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            
+            // 計算分頁
+            const totalPages = Math.ceil(results.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageResults = results.slice(startIndex, endIndex);
+            
+            let html = `<h2 style="margin-bottom: 20px; color: #2c3e50;">📊 ${title} (${results.length}筆)</h2>`;
+            
+            pageResults.forEach(error => {
+                const levelColors = {
+                    1: '#28a745',
+                    2: '#ffc107', 
+                    3: '#fd7e14',
+                    4: '#dc3545',
+                    5: '#6f42c1'
+                };
+                
+                const levelTexts = {
+                    1: '1級 - 顯示故障，運行不受影響',
+                    2: '2級 - 脫離群控，可正常運行',
+                    3: '3級 - 停最近層後禁止運行',
+                    4: '4級 - 立即封鎖，可低速運行',
+                    5: '5級 - 立即封鎖，禁止運行'
+                };
+                
+                html += `
+                    <div class="error-card">
+                        <div class="error-header" style="background: linear-gradient(135deg, ${levelColors[error.level]}, ${levelColors[error.level]}dd);">
+                            <span class="error-code">${error.code}</span>
+                            <span class="error-level">${levelTexts[error.level]}</span>
+                        </div>
+                        <div class="error-body">
+                            <div class="error-description">${error.description}</div>
+                            
+                            <div class="circuit-info">
+                                <h4>🔧 對應控制迴路：${error.circuit} ${error.page}</h4>
+                                <div class="component-list">
+                                    ${error.components.map(comp => `<span class="component-tag">${comp}</span>`).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="circuit-info">
+                                <h4>⚠️ 可能原因：</h4>
+                                <ul>
+                                    ${error.causes.map(cause => `<li>${cause}</li>`).join('')}
+                                </ul>
+                            </div>
+                            
+                            <div class="solution">
+                                <h4>🛠️ 解決方案：</h4>
+                                <ul>
+                                    ${error.solutions.map(solution => `<li>${solution}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+            
+            // 顯示分頁
+            displayPagination(totalPages);
+        }
+
+        // 顯示分頁
+        function displayPagination(totalPages) {
+            const paginationDiv = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+            
+            let paginationHtml = '';
+            
+            // 上一頁按鈕
+            paginationHtml += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>⬅️ 上一頁</button>`;
+            
+            // 頁碼按鈕
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            if (startPage > 1) {
+                paginationHtml += `<button onclick="changePage(1)">1</button>`;
+                if (startPage > 2) {
+                    paginationHtml += `<span>...</span>`;
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `<button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>${i}</button>`;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHtml += `<span>...</span>`;
+                }
+                paginationHtml += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            // 下一頁按鈕
+            paginationHtml += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一頁 ➡️</button>`;
+            
+            paginationDiv.innerHTML = paginationHtml;
+        }
+
+        // 換頁
+        function changePage(page) {
+            if (page < 1 || page > Math.ceil(currentResults.length / itemsPerPage)) {
+                return;
+            }
+            
+            currentPage = page;
+            displayResults(currentResults, getResultTitle());
+            
+            // 滾動到結果區域
+            document.getElementById('errorResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 獲取結果標題
+        function getResultTitle() {
+            if (currentFilter === 'all') {
+                return '所有故障碼';
+            } else if (typeof currentFilter === 'number') {
+                return `${currentFilter}級故障`;
+            } else {
+                return '搜尋結果';
+            }
+        }
+
+        // 清除搜尋
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('errorResults').innerHTML = '';
+            document.getElementById('pagination').innerHTML = '';
+            currentResults = [];
+            currentPage = 1;
+            
+            // 重置過濾按鈕
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            currentFilter = 'all';
+            
+            // 顯示歡迎訊息
+            showWelcomeMessage();
+        }
+
+        // 匯出結果
+        function exportResults() {
+            if (currentResults.length === 0) {
+                alert('沒有可匯出的資料');
+                return;
+            }
+            
+            let csvContent = "故障碼,描述,等級,控制迴路,頁次,主要元件,可能原因,解決方案\n";
+            
+            currentResults.forEach(error => {
+                const row = [
+                    error.code,
+                    `"${error.description}"`,
+                    error.level,
+                    error.circuit,
+                    error.page,
+                    `"${error.components.join('; ')}"`,
+                    `"${error.causes.join('; ')}"`,
+                    `"${error.solutions.join('; ')}"`
+                ].join(',');
+                csvContent += row + "\n";
+            });
+            
+            // 創建下載連結
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `電梯故障碼_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 顯示所有故障碼
+        function showAllErrors() {
+            currentResults = Object.values(errorDatabase);
+            currentPage = 1;
+            displayResults(currentResults, '所有故障碼');
+        }
+
+        // 顯示歡迎訊息
+        function showWelcomeMessage() {
+            const resultsDiv = document.getElementById('errorResults');
+            resultsDiv.innerHTML = `
+                <div style="text-align: center; padding: 50px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 15px; margin-top: 20px;">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px;">🚀 歡迎使用電梯故障碼查詢系統</h3>
+                    <p style="color: #6c757d; font-size: 1.1em; margin-bottom: 25px;">請選擇以下方式開始查詢：</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto;">
+                        <button onclick="document.getElementById('searchInput').focus()" style="padding: 15px 20px; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px;">🔍 輸入故障碼查詢</button>
+                        <button onclick="showAllErrors()" style="padding: 15px 20px; background: #27ae60; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px;">📋 顯示所有故障碼</button>
+                        <button onclick="filterByLevel(5)" style="padding: 15px 20px; background: #6f42c1; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px;">⚠️ 查看5級故障</button>
+                        <button onclick="showCircuitErrors('安全回路')" style="padding: 15px 20px; background: #e74c3c; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px;">🛡️ 安全回路故障</button>
+                    </div>
+                    <div style="margin-top: 30px; padding: 20px; background: rgba(52, 152, 219, 0.1); border-radius: 10px; border-left: 4px solid #3498db;">
+                        <h4 style="color: #2c3e50; margin-bottom: 10px;">💡 使用提示</h4>
+                        <ul style="text-align: left; color: #6c757d; max-width: 600px; margin: 0 auto;">
+                            <li>可以輸入完整故障碼（如：Er.030）或簡化格式（如：030）</li>
+                            <li>支援中文關鍵字搜尋（如：安全回路、抱閘、門機）</li>
+                            <li>點擊控制迴路卡片可查看該迴路相關的所有故障</li>
+                            <li>使用等級過濾器快速找到特定嚴重程度的故障</li>
+                            <li>可匯出搜尋結果為CSV檔案供離線使用</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 按Enter鍵搜尋
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchError();
+            }
+        });
+
+        // 實時搜尋建議
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.trim().toLowerCase();
+            
+            if (searchTerm.length >= 2) {
+                // 這裡可以添加搜尋建議功能
+                // showSearchSuggestions(searchTerm);
+            }
+        });
+
+        // 更新統計資訊
+        function updateStats() {
+            const totalErrors = Object.keys(errorDatabase).length;
+            document.getElementById('totalErrors').textContent = totalErrors;
+            
+            // 更新各迴路故障數量
+            const circuitCounts = {};
+            Object.values(errorDatabase).forEach(error => {
+                circuitCounts[error.circuit] = (circuitCounts[error.circuit] || 0) + 1;
+            });
+            
+            // 更新迴路卡片上的故障數量
+            const circuitMapping = {
+                '安全回路': 'safetyCount',
+                '抱閘回路': 'brakeCount', 
+                '檢修回路': 'inspectionCount',
+                '驅動系統': 'driveCount',
+                '編碼器系統': 'encoderCount',
+                '通訊系統': 'commCount',
+                '門機系統': 'doorCount',
+                '照明回路': 'lightCount'
+            };
+            
+            Object.entries(circuitMapping).forEach(([circuit, elementId]) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = circuitCounts[circuit] || 0;
+                }
+            });
+        }
+
+        // 添加鍵盤快捷鍵
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + F 聚焦搜尋框
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+            
+            // ESC 清除搜尋
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+
+        // 添加滾動到頂部功能
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 當滾動超過一定距離時顯示返回頂部按鈕
+        window.addEventListener('scroll', function() {
+            const scrollButton = document.getElementById('scrollToTop');
+            if (window.pageYOffset > 300) {
+                if (!scrollButton) {
+                    const button = document.createElement('button');
+                    button.id = 'scrollToTop';
+                    button.innerHTML = '⬆️';
+                    button.style.cssText = `
+                        position: fixed;
+                        bottom: 30px;
+                        right: 30px;
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        background: #3498db;
+                        color: white;
+                        border: none;
+                        font-size: 20px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        z-index: 1000;
+                        transition: all 0.3s ease;
+                    `;
+                    button.onclick = scrollToTop;
+                    document.body.appendChild(button);
+                }
+            } else if (scrollButton) {
+                scrollButton.remove();
+            }
+        });
+
+        // 頁面載入時初始化
+        window.onload = function() {
+            showWelcomeMessage();
+            updateStats();
+            
+            // 預載入一些常用故障碼
+            console.log('電梯故障碼查詢系統已載入');
+            console.log(`總計 ${Object.keys(errorDatabase).length} 個故障碼`);
+        };
+
+        // 添加主題切換功能（可選）
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+        }
+
+        // 載入保存的主題設置
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+
+        // 添加故障碼收藏功能
+        let favoriteErrors = JSON.parse(localStorage.getItem('favoriteErrors') || '[]');
+
+        function toggleFavorite(errorCode) {
+            const index = favoriteErrors.indexOf(errorCode);
+            if (index > -1) {
+                favoriteErrors.splice(index, 1);
+            } else {
+                favoriteErrors.push(errorCode);
+            }
+            localStorage.setItem('favoriteErrors', JSON.stringify(favoriteErrors));
+            
+            // 更新UI
+            updateFavoriteButtons();
+        }
+
+        function showFavorites() {
+            if (favoriteErrors.length === 0) {
+                alert('尚未收藏任何故障碼');
+                return;
+            }
+            
+            currentResults = favoriteErrors.map(code => errorDatabase[code]).filter(error => error);
+            currentPage = 1;
+            displayResults(currentResults, '收藏的故障碼');
+        }
+
+        // 添加故障碼比較功能
+        let compareList = [];
+
+        function addToCompare(errorCode) {
+            if (compareList.includes(errorCode)) {
+                return;
+            }
+            
+            if (compareList.length >= 3) {
+                alert('最多只能比較3個故障碼');
+                return;
+            }
+            
+            compareList.push(errorCode);
+            updateCompareUI();
+        }
+
+        function showComparison() {
+            if (compareList.length < 2) {
+                alert('請至少選擇2個故障碼進行比較');
+                return;
+            }
+            
+            // 這裡可以實現故障碼比較功能
+            console.log('比較故障碼:', compareList);
+        }
+
+        // 添加快速搜尋標籤
+        function addQuickSearchTags() {
+            const quickTags = ['安全回路', '抱閘', '門機', '編碼器', '通訊', '超速', '終端', '檢修'];
+            const searchSection = document.querySelector('.search-section');
+            
+            const tagsDiv = document.createElement('div');
+            tagsDiv.style.cssText = 'margin-top: 15px; text-align: center;';
+            tagsDiv.innerHTML = '<p style="margin-bottom: 10px; color: #6c757d;">快速搜尋：</p>';
+            
+            quickTags.forEach(tag => {
+                const tagButton = document.createElement('button');
+                tagButton.textContent = tag;
+                tagButton.style.cssText = `
+                    margin: 0 5px 5px 0;
+                    padding: 5px 12px;
+                    background: #ecf0f1;
+                    border: 1px solid #bdc3c7;
+                    border-radius: 15px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    transition: all 0.3s ease;
+                `;
+                tagButton.onclick = () => {
+                    document.getElementById('searchInput').value = tag;
+                    searchError();
+                };
+                tagsDiv.appendChild(tagButton);
+            });
+            
+            searchSection.appendChild(tagsDiv);
+        }
+
+        // 在頁面載入完成後添加快速搜尋標籤
+        document.addEventListener('DOMContentLoaded', function() {
+            addQuickSearchTags();
+        });
+    </script>
+</body>
+</html>
+
