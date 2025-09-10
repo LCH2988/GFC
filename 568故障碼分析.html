@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>電梯故障I/O狀態分析系統</title>
+    <title>電梯故障I/O狀態分析系統 - PU568 OBM</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -35,9 +35,14 @@
         }
         
         .header h1 {
-            font-size: 2.2em;
+            font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
         }
         
         .fault-input-section {
@@ -46,11 +51,20 @@
             border-bottom: 2px solid #e9ecef;
         }
         
+        .section-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
         .fault-input-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .input-group {
@@ -60,37 +74,69 @@
         
         .input-group label {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #2c3e50;
+            font-size: 14px;
         }
         
         .input-group input, .input-group select {
-            padding: 10px;
+            padding: 12px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
         }
         
         .input-group input:focus, .input-group select:focus {
             outline: none;
             border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
         
-        .analyze-btn {
+        .hex-input {
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            background: #f8f9fa;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .btn {
             background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 12px 25px;
             border-radius: 25px;
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .analyze-btn:hover {
+        .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn.btn-success {
+            background: linear-gradient(45deg, #27ae60, #229954);
+        }
+        
+        .btn.btn-warning {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+        }
+        
+        .btn.btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
         }
         
         .results-section {
@@ -99,67 +145,97 @@
         }
         
         .fault-overview {
-            background: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
             border: 1px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 25px;
             margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .fault-overview h3 {
             color: #856404;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .fault-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
         }
         
         .detail-item {
             background: white;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 15px;
+            border-radius: 8px;
             border-left: 4px solid #f39c12;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
         .detail-item strong {
             color: #2c3e50;
+            display: block;
+            margin-bottom: 5px;
         }
         
         .io-analysis {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
             margin-top: 30px;
         }
         
         .io-section {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
             overflow: hidden;
+            border: 1px solid #e9ecef;
         }
         
         .io-section h4 {
             background: linear-gradient(45deg, #34495e, #2c3e50);
             color: white;
-            padding: 15px 20px;
+            padding: 18px 25px;
             margin: 0;
-            font-size: 1.1em;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .io-content {
-            padding: 20px;
+            padding: 25px;
+        }
+        
+        .signal-group {
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .signal-group-header {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: bold;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .signal-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
-            margin-bottom: 15px;
+            gap: 6px;
+            padding: 15px;
+            background: white;
         }
         
         .signal-bit {
@@ -167,40 +243,73 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 10px;
+            padding: 4px;
+            text-align: center;
+            line-height: 1.1;
+            border: 2px solid transparent;
             transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .signal-bit:hover {
+            transform: scale(1.1);
+            z-index: 10;
         }
         
         .signal-bit.active {
             background: #e74c3c;
             color: white;
+            border-color: #c0392b;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
         }
         
         .signal-bit.inactive {
             background: #ecf0f1;
             color: #7f8c8d;
+            border-color: #bdc3c7;
+        }
+        
+        .signal-bit.critical.active {
+            background: #8e44ad;
+            border-color: #7d3c98;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(142, 68, 173, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(142, 68, 173, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(142, 68, 173, 0); }
         }
         
         .signal-description {
-            font-size: 13px;
-            color: #555;
+            font-size: 12px;
+            color: #666;
             line-height: 1.4;
             margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
         }
         
         .critical-signals {
             background: #ffebee;
-            border: 1px solid #ffcdd2;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
+            border: 2px solid #ffcdd2;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
         }
         
         .critical-signals h5 {
             color: #c62828;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .critical-list {
@@ -210,11 +319,14 @@
         
         .critical-list li {
             background: white;
-            margin: 5px 0;
-            padding: 8px 12px;
-            border-radius: 5px;
+            margin: 8px 0;
+            padding: 12px 15px;
+            border-radius: 6px;
             border-left: 4px solid #e74c3c;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .status-indicator {
@@ -229,9 +341,128 @@
         .status-warning { background: #f39c12; }
         .status-error { background: #e74c3c; }
         
-        .hex-input {
-            font-family: 'Courier New', monospace;
-            text-transform: uppercase;
+        .enhancement-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .enhancement-section h5 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .maintenance-advice ol {
+            padding-left: 20px;
+        }
+        
+        .maintenance-advice li {
+            margin: 8px 0;
+            line-height: 1.5;
+            color: #495057;
+        }
+        
+        .real-time-monitor {
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.1);
+        }
+        
+        .real-time-monitor h4 {
+            color: #3498db;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .rt-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .rt-signal {
+            border: 2px solid #d0d7de;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 8px 4px;
+            text-align: center;
+            background: #f6f8fa;
+            color: #57606a;
+            transition: all 0.3s ease;
+            line-height: 1.2;
+            cursor: pointer;
+        }
+        
+        .rt-signal.on {
+            background: #16a34a;
+            color: white;
+            border-color: #15803d;
+            box-shadow: 0 0 10px rgba(22, 163, 74, 0.3);
+        }
+        
+        .rt-signal.off {
+            background: #eceff1;
+            color: #6b7280;
+            border-color: #d1d5db;
+        }
+        
+        .rt-signal.critical.on {
+            background: #dc2626;
+            border-color: #b91c1c;
+            animation: pulse 2s infinite;
+        }
+        
+        .monitor-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
+        }
+        
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #333;
+            z-index: 1000;
         }
         
         @media (max-width: 768px) {
@@ -246,6 +477,19 @@
             .signal-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
+            
+            .rt-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .button-container {
+                justify-content: stretch;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -257,31 +501,127 @@
         </div>
         
         <div class="fault-input-section">
-            <h3 style="margin-bottom: 20px; color: #2c3e50;">故障信息輸入</h3>
+            <h3 class="section-title">📝 故障信息輸入</h3>
             <div class="fault-input-container">
                 <div class="input-group">
                     <label>故障日期 (DD/MM/YY)</label>
                     <input type="text" id="faultDate" placeholder="01/00/00" maxlength="8">
                 </div>
                 <div class="input-group">
+                    <label>故障時間 (HH:MM)</label>
+                    <input type="text" id="faultTime" placeholder="10:24" maxlength="5">
+                </div>
+                <div class="input-group">
                     <label>故障碼</label>
                     <select id="faultCode">
-                        <option value="2C">2C - 鋼索伸長補正，補過頭，補正速度太快</option>
                         <option value="10">10 - PG增減方向不對</option>
                         <option value="11">11 - 電梯溜車</option>
                         <option value="12">12 - 變頻器ZSD未送出</option>
                         <option value="13">13 - 變頻器故障</option>
+                        <option value="14">14 - (保留)</option>
+                        <option value="15">15 - INSS、KNOR同時動作或未進</option>
+                        <option value="16">16 - 做過AH</option>
+                        <option value="17">17 - 發生過地震</option>
+                        <option value="18">18 - 發生過火災或消防運轉</option>
+                        <option value="19">19 - 24V電源喪失</option>
+                        <option value="1A">1A - 發生過緊急電源運轉</option>
+                        <option value="1B">1B - ACVF門，DERR1動作</option>
+                        <option value="1C">1C - 變頻器UA/DA同時收到</option>
+                        <option value="1D">1D - 減速時間超時</option>
                         <option value="20">20 - LS3動作</option>
                         <option value="21">21 - LS4動作</option>
+                        <option value="22">22 - 電梯在最下階，LS5沒進</option>
+                        <option value="23">23 - 電梯在最上階，LS6沒進</option>
+                        <option value="24">24 - CCR、A4、A10、A11、TA12、P24、PAK沒進</option>
                         <option value="25">25 - 開門失敗>=3次</option>
+                        <option value="26">26 - 開門失敗，18DS沒進</option>
                         <option value="27">27 - 關門失敗>=3次</option>
-                        <option value="31">31 - 變頻器過電流</option>
+                        <option value="28">28 - 關門失敗，DCR沒進</option>
+                        <option value="29">29 - DCR、HDC動作不一致</option>
+                        <option value="2A">2A - 電梯5s內，移動距離<600 pulse</option>
+                        <option value="2B">2B - 鋼索伸長補正，超過3次沒補正</option>
+                        <option value="2C" selected>2C - 鋼索伸長補正，補過頭，補正速度太快</option>
+                        <option value="2D">2D - 運轉中CPLD的C2CCX，C2SMR沒進</option>
+                        <option value="2E">2E - 鋼索伸長補正，動作時間過長</option>
+                        <option value="2F">2F - CPF動作</option>
+                        <option value="31">31 - 變頻器過電流，Reset 3次</option>
+                        <option value="32">32 - 變頻器過電壓，Reset 3次</option>
+                        <option value="33">33 - 變頻器過載</option>
+                        <option value="34">34 - 變頻器過熱</option>
                         <option value="35">35 - 超速</option>
+                        <option value="36">36 - DC BUS低電壓檢出</option>
+                        <option value="37">37 - 回生電阻過熱</option>
+                        <option value="38">38 - 變頻器外部故障</option>
+                        <option value="39">39 - 變頻器主機板不良</option>
+                        <option value="3A">3A - 馬達過載，Reset 3次</option>
+                        <option value="3B">3B - IGBT損壞</option>
+                        <option value="3C">3C - 欠相</option>
+                        <option value="3D">3D - 速度偏差過大</option>
+                        <option value="3E">3E - PG斷線</option>
+                        <option value="41">41 - 12V電源喪失</option>
+                        <option value="42">42 - 12V電源確立</option>
+                        <option value="43">43 - 轎頂板通訊異常</option>
+                        <option value="44">44 - HID通訊異常</option>
+                        <option value="45">45 - HCAN Reset</option>
+                        <option value="46">46 - KCAN Reset</option>
+                        <option value="47">47 - 啟動方向被變頻器切斷</option>
+                        <option value="59">59 - 變頻器39故障</option>
+                        <option value="A0">A0 - 變頻器FHM錯誤</option>
                         <option value="A1">A1 - 變頻器SDO CAN BUS異常</option>
+                        <option value="A2">A2 - watchDOg</option>
+                        <option value="A3">A3 - (保留)</option>
+                        <option value="A4">A4 - 參數設定Check Sum錯誤</option>
+                        <option value="A5">A5 - 參數樓層錯誤</option>
+                        <option value="A6">A6 - PU累加CPLD數值運算錯誤</option>
+                        <option value="A7">A7 - CPLD累加PU數值運算錯誤</option>
+                        <option value="A8">A8 - 變頻器SDO CAN通訊Timeout</option>
+                        <option value="A9">A9 - PR值太小</option>
+                        <option value="AA">AA - RTC錯誤</option>
+                        <option value="AB">AB - Timer錯誤</option>
+                        <option value="AC">AC - 變頻器ID錯誤</option>
+                        <option value="AD">AD - 變頻器與PU樓層不同</option>
+                        <option value="B1">B1 - DZN、LSA、LSB邏輯錯誤</option>
                         <option value="B2">B2 - MTH動作</option>
+                        <option value="B3">B3 - 停車PG誤差超過200mm</option>
+                        <option value="B4">B4 - 啟動PG誤差超過20mm</option>
+                        <option value="BE">BE - 運轉中，PG變化量過小</option>
+                        <option value="BF">BF - 停車PG變化>107mm</option>
                         <option value="C4">C4 - 變頻器PDO CAN BUS timeout</option>
+                        <option value="C5">C5 - 運轉中，DCR off 3次</option>
+                        <option value="C6">C6 - 變頻器運轉中，RUN & RDY沒送出</option>
+                        <option value="C7">C7 - 雙出入口，前後門同時打開</option>
+                        <option value="C8">C8 - 雙出入口，開錯門</option>
+                        <option value="C9">C9 - 運轉中，HDC off 3次</option>
+                        <option value="CA">CA - 變頻門機，DERR2</option>
+                        <option value="CE">CE - AMC1動作與檢出不一致(0.3S)</option>
+                        <option value="CF">CF - AMC2動作與檢出不一致(0.3S)</option>
+                        <option value="D2">D2 - LS5，LS6動作，系統不是在終端樓</option>
+                        <option value="D8">D8 - 電梯速度>減速開關下限</option>
+                        <option value="D9">D9 - 電梯速度>1XL/ZXL極限開關速度</option>
+                        <option value="DA">DA - 電梯速度>極限開關設定速度</option>
+                        <option value="DB">DB - AMC1動作與檢出不一致(2S)</option>
+                        <option value="DC">DC - AMC2動作與檢出不一致(2S)</option>
+                        <option value="E0">E0 - 拉樓平>3次</option>
                         <option value="E3">E3 - DCR、HDC、18DS邏輯錯誤</option>
-                        <option value="F2">F2 - PG值超出樓層範圍</option>
+                        <option value="E4">E4 - 電梯速度>設定上限</option>
+                        <option value="E5">E5 - BKX，BKXS動作不一致</option>
+                        <option value="E6">E6 - Slip</option>
+                        <option value="E7">E7 - 電梯BK動作與BLS2動作不一致</option>
+                        <option value="E8">E8 - 電梯BK動作與BLS1動作不一致</option>
+                        <option value="E9">E9 - 樓平開關異常</option>
+                        <option value="ED">ED - 運轉中，PG變化量相反</option>
+                        <option value="EE">EE - Door Zone二重化錯誤</option>
+                        <option value="EF">EF - DCR二重化錯誤</option>
+                        <option value="F0">F0 - 變頻器輸出與PU命令不一致</option>
+                        <option value="F1">F1 - 溜車，車廂停在最頂樓</option>
+                        <option value="F2">F2 - PG值超出最低最高樓層</option>
+                        <option value="F3">F3 - 變頻器PDO CAN BUS timeout>3次</option>
+                        <option value="F5">F5 - 變頻器連續故障超過3次</option>
+                        <option value="F6">F6 - invBK或InvZSD異常</option>
+                        <option value="F7">F7 - 拉不到樓平，電梯已到頂樓</option>
+                        <option value="F8">F8 - UCMP測試異常</option>
+                        <option value="F9">F9 - "1C"故障>3次</option>
+                        <option value="FA">FA - 2A故障>3次</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -292,29 +632,46 @@
                     <label>目前樓層</label>
                     <input type="number" id="currentFloor" placeholder="01" min="0" max="64">
                 </div>
+                <div class="input-group">
+                    <label>目標樓層</label>
+                    <input type="number" id="targetFloor" placeholder="03" min="0" max="64">
+                </div>
             </div>
             
-            <h4 style="margin: 20px 0 10px 0; color: #2c3e50;">I/O信號狀態 (16進制格式)</h4>
+            <h4 class="section-title">🔌 I/O信號狀態 (16進制格式)</h4>
             <div class="fault-input-container">
                 <div class="input-group">
-                    <label>ERR&lt;00.1&gt; Input信號</label>
+                    <label>ERR&lt;00.1&gt; Input信號 (in0~in10)</label>
                     <input type="text" id="inputSignals" placeholder="D7,82,31,FE,BE,30,70,0A,B1,33,53" class="hex-input">
                 </div>
                 <div class="input-group">
-                    <label>ERR&lt;00.2&gt; Output信號</label>
+                    <label>ERR&lt;00.2&gt; Output信號 (out0~out10)</label>
                     <input type="text" id="outputSignals" placeholder="24,3B,4B,4D,68,C5,2C,11,91,C2,003" class="hex-input">
                 </div>
                 <div class="input-group">
-                    <label>ERR&lt;00.3&gt; InFlag信號</label>
+                    <label>ERR&lt;00.3&gt; InFlag信號 (inflag0~inflag10)</label>
                     <input type="text" id="inflagSignals" placeholder="4D,68,C5,2C,11,91,C2,73,72,02,51" class="hex-input">
                 </div>
                 <div class="input-group">
                     <label>ERR&lt;00.4&gt; 系統狀態</label>
-                    <input type="text" id="systemStatus" placeholder="00000000:00,00,00,0000,00,00,00" class="hex-input">
+                    <input type="text" id="systemStatus" placeholder="00000000:0000,00,0000,00,00,00" class="hex-input">
                 </div>
             </div>
             
-            <button class="analyze-btn" onclick="analyzeFault()">🔍 分析故障狀態</button>
+            <div class="button-container">
+                <button class="btn" onclick="analyzeFault()">
+                    🔍 基本分析
+                </button>
+                <button class="btn btn-success" onclick="enhancedAnalyzeFault()">
+                    🚀 增強分析
+                </button>
+                <button class="btn btn-warning" onclick="startRealTimeMonitoring()">
+                    📡 實時監控
+                </button>
+                <button class="btn btn-danger" onclick="generateFaultReport()">
+                    📄 生成報告
+                </button>
+            </div>
         </div>
         
         <div class="results-section" id="resultsSection">
@@ -329,53 +686,190 @@
     </div>
 
     <script>
-        // 故障碼說明對照
+        // 完整故障碼說明對照表
         const faultCodeDescriptions = {
-            '10': { desc: 'PG增減方向不對', level: 'critical', action: '檢查PG編碼器接線及設定' },
-            '11': { desc: '電梯溜車', level: 'critical', action: '立即檢查煞車系統' },
-            '12': { desc: '變頻器ZSD未送出', level: 'warning', action: '檢查變頻器零速信號' },
-            '13': { desc: '變頻器故障', level: 'critical', action: '檢查變頻器Ready信號' },
-            '20': { desc: 'LS3動作', level: 'critical', action: '下終端停止極限開關動作' },
-            '21': { desc: 'LS4動作', level: 'critical', action: '上終端停止極限開關動作' },
-            '25': { desc: '開門失敗>=3次', level: 'warning', action: '檢查開門系統及18DS開關' },
-            '27': { desc: '關門失敗>=3次', level: 'warning', action: '檢查關門系統及DCR開關' },
-            '2C': { desc: '鋼索伸長補正異常', level: 'warning', action: '檢查鋼索補償系統' },
-            '31': { desc: '變頻器過電流', level: 'critical', action: '檢查馬達及變頻器' },
-            '35': { desc: '超速', level: 'critical', action: '檢查調速系統及安全裝置' },
-            'A1': { desc: '變頻器CAN通訊異常', level: 'critical', action: '檢查CAN通訊線路' },
-            'B2': { desc: 'MTH動作', level: 'critical', action: '馬達過熱，檢查散熱系統' },
-            'C4': { desc: '變頻器PDO通訊超時', level: 'critical', action: '檢查PDO通訊設定' },
-            'E3': { desc: '門系統邏輯錯誤', level: 'critical', action: '檢查門安全開關邏輯' },
-            'F2': { desc: 'PG值超出樓層範圍', level: 'critical', action: '檢查PG計數及樓層設定' }
+            '10': { desc: 'PG增減方向不對', level: 'critical', action: '檢查PG編碼器接線及設定，確認UP時PG增加，DN時PG減少' },
+            '11': { desc: '電梯溜車', level: 'critical', action: '立即檢查煞車系統，確認BLS1/BLS2煞車檢知開關' },
+            '12': { desc: '變頻器ZSD未送出', level: 'warning', action: '檢查變頻器零速信號，確認變頻器停止後0.5s內送出ZSD' },
+            '13': { desc: '變頻器故障', level: 'critical', action: '檢查變頻器Ready信號，確認變頻器電源及參數設定' },
+            '14': { desc: '(保留)', level: 'info', action: '保留故障碼' },
+            '15': { desc: 'INSS、KNOR同時動作或未進', level: 'warning', action: '檢查檢修開關及高速開關狀態' },
+            '16': { desc: '做過AH', level: 'info', action: '電梯執行過自動回歸基準樓運轉' },
+            '17': { desc: '發生過地震', level: 'warning', action: '檢查地震感應器及地震管制系統' },
+            '18': { desc: '發生過火災或消防運轉', level: 'warning', action: '檢查火災受信及消防運轉系統' },
+            '19': { desc: '24V電源喪失', level: 'critical', action: '檢查24V電源供應系統' },
+            '1A': { desc: '發生過緊急電源運轉', level: 'warning', action: '檢查UPS或緊急電源系統' },
+            '1B': { desc: 'ACVF門，DERR1動作', level: 'warning', action: '檢查ACVF門機系統，DERR1故障信號' },
+            '1C': { desc: '變頻器UA/DA同時收到', level: 'warning', action: '檢查變頻器上行/下行指令邏輯' },
+            '1D': { desc: '減速時間超時', level: 'warning', action: '檢查減速參數設定，Max DCC時間設定' },
+            '20': { desc: 'LS3動作', level: 'critical', action: '下終端停止極限開關動作，檢查電梯位置及極限開關' },
+            '21': { desc: 'LS4動作', level: 'critical', action: '上終端停止極限開關動作，檢查電梯位置及極限開關' },
+            '22': { desc: '電梯在最下階，LS5沒進', level: 'critical', action: '檢查下終端階減速極限開關LS5' },
+            '23': { desc: '電梯在最上階，LS6沒進', level: 'critical', action: '檢查上終端階減速極限開關LS6' },
+            '24': { desc: 'CCR、A4、A10、A11、TA12、P24、PAK沒進', level: 'critical', action: '檢查安全迴路各開關狀態' },
+            '25': { desc: '開門失敗>=3次', level: 'warning', action: '檢查開門系統及18DS門開到底檢知開關' },
+            '26': { desc: '開門失敗，18DS沒進', level: 'warning', action: '檢查門開到底檢知開關18DS及開門機構' },
+            '27': { desc: '關門失敗>=3次', level: 'warning', action: '檢查關門系統及DCR門全關檢知開關' },
+            '28': { desc: '關門失敗，DCR沒進', level: 'warning', action: '檢查門全關檢知開關DCR及關門機構' },
+            '29': { desc: 'DCR、HDC動作不一致', level: 'warning', action: '檢查門全關開關DCR及乘場門安全開關HDC邏輯' },
+            '2A': { desc: '電梯5s內，移動距離<600 pulse', level: 'warning', action: '檢查電梯運行速度及PG計數系統' },
+            '2B': { desc: '鋼索伸長補正，超過3次沒補正', level: 'warning', action: '檢查鋼索延伸補償系統WSE參數' },
+            '2C': { desc: '鋼索伸長補正，補過頭，補正速度太快', level: 'warning', action: '調整鋼索補償參數，檢查補償速度設定' },
+            '2D': { desc: '運轉中CPLD的C2CCX，C2SMR沒進', level: 'critical', action: '檢查CPLD基板及安全迴路狀態' },
+            '2E': { desc: '鋼索伸長補正，動作時間過長', level: 'warning', action: '檢查WSE補償時間參數，預設20秒' },
+            '2F': { desc: 'CPF動作', level: 'warning', action: '檢查門反轉系統CPF' },
+            '31': { desc: '變頻器過電流，Reset 3次', level: 'critical', action: '檢查馬達及變頻器，確認負載狀況' },
+            '32': { desc: '變頻器過電壓，Reset 3次', level: 'critical', action: '檢查電源電壓及變頻器參數' },
+            '33': { desc: '變頻器過載', level: 'critical', action: '檢查變頻器負載及散熱系統' },
+            '34': { desc: '變頻器過熱', level: 'critical', action: '檢查變頻器散熱風扇及環境溫度' },
+            '35': { desc: '超速', level: 'critical', action: '檢查調速系統及安全裝置，立即停止運轉' },
+            '36': { desc: 'DC BUS低電壓檢出', level: 'warning', action: '檢查直流母線電壓及電源供應' },
+            '37': { desc: '回生電阻過熱', level: 'warning', action: '檢查回生電阻及散熱系統' },
+            '38': { desc: '變頻器外部故障', level: 'critical', action: '檢查變頻器外部故障輸入信號' },
+            '39': { desc: '變頻器主機板不良，Reset 3次', level: 'critical', action: '更換變頻器主機板' },
+            '3A': { desc: '馬達過載，Reset 3次', level: 'critical', action: '檢查馬達負載及過載保護設定' },
+            '3B': { desc: 'IGBT損壞', level: 'critical', action: '更換變頻器IGBT模組' },
+            '3C': { desc: '欠相', level: 'critical', action: '檢查三相電源供應' },
+            '3D': { desc: '速度偏差過大', level: 'warning', action: '檢查速度回饋及PG信號' },
+            '3E': { desc: 'PG斷線', level: 'critical', action: '檢查PG編碼器接線及信號' },
+            '41': { desc: '12V電源喪失', level: 'warning', action: '檢查12V電源供應系統' },
+            '42': { desc: '12V電源確立', level: 'info', action: '12V電源恢復正常' },
+            '43': { desc: '轎頂板通訊異常', level: 'warning', action: '檢查轎頂板通訊線路' },
+            '44': { desc: 'HID通訊異常', level: 'warning', action: '檢查HID通訊系統' },
+            '45': { desc: 'HCAN Reset', level: 'warning', action: '檢查HCAN通訊系統' },
+            '46': { desc: 'KCAN Reset', level: 'warning', action: '檢查KCAN通訊系統' },
+            '47': { desc: '啟動方向被變頻器切斷', level: 'warning', action: '檢查變頻器RDY、ZSD信號，超過5次' },
+            '59': { desc: '變頻器39故障', level: 'critical', action: '參考故障碼39處理方式' },
+            'A0': { desc: '變頻器FHM錯誤', level: 'critical', action: '檢查變頻器FHM功能' },
+            'A1': { desc: '變頻器SDO CAN BUS異常', level: 'critical', action: '檢查變頻器CAN通訊線路及參數' },
+            'A2': { desc: 'watchDOg', level: 'critical', action: '檢查系統看門狗功能' },
+            'A3': { desc: '(保留)', level: 'info', action: '保留故障碼' },
+            'A4': { desc: '參數設定Check Sum錯誤', level: 'warning', action: '重新設定參數，連續3次錯誤' },
+            'A5': { desc: '參數樓層錯誤', level: 'warning', action: '檢查參數Max floor設定，應>0且<=64' },
+            'A6': { desc: 'PU累加CPLD數值運算錯誤', level: 'warning', action: '檢查PU與CPLD通訊' },
+            'A7': { desc: 'CPLD累加PU數值運算錯誤', level: 'warning', action: '檢查CPLD與PU通訊' },
+            'A8': { desc: '變頻器SDO CAN通訊Timeout', level: 'critical', action: '檢查CAN通訊，超過30mS' },
+            'A9': { desc: 'PR值太小', level: 'warning', action: '檢查PR參數設定，應>=0.001' },
+            'AA': { desc: 'RTC錯誤', level: 'warning', action: '檢查即時時鐘RTC功能' },
+            'AB': { desc: 'Timer錯誤', level: 'warning', action: '檢查系統計時器功能' },
+            'AC': { desc: '變頻器ID錯誤', level: 'warning', action: '檢查變頻器ID設定' },
+            'AD': { desc: '變頻器與PU樓層不同', level: 'warning', action: '檢查變頻器與PU樓層同步' },
+            'B1': { desc: 'DZN、LSA、LSB邏輯錯誤', level: 'critical', action: '檢查開門區及平層開關邏輯' },
+            'B2': { desc: 'MTH動作', level: 'critical', action: '馬達過熱保護動作，檢查散熱系統' },
+            'B3': { desc: '停車PG誤差超過200mm', level: 'warning', action: '檢查高速停車精度及PG計數' },
+            'B4': { desc: '啟動PG誤差超過20mm', level: 'warning', action: '檢查啟動位置精度' },
+            'BE': { desc: '運轉中，PG變化量過小', level: 'warning', action: '檢查PG計數，<5 pulse/2sec，3次後死機' },
+            'BF': { desc: '停車PG變化>107mm', level: 'warning', action: '檢查停車狀態PG變化，3次後死機' },
+            'C4': { desc: '變頻器PDO CAN BUS timeout', level: 'critical', action: '檢查PDO通訊，低速立即CUT CC，高速停車後CUT CC' },
+            'C5': { desc: '運轉中，DCR off 3次', level: 'warning', action: '檢查DCR門全關開關，拉樓平後死機' },
+            'C6': { desc: '變頻器運轉中，RUN & RDY沒送出', level: 'critical', action: '檢查變頻器RUN運轉信號及Ready信號' },
+            'C7': { desc: '雙出入口，前後門同時打開', level: 'warning', action: '檢查雙出入口門控邏輯' },
+            'C8': { desc: '雙出入口，開錯門', level: 'warning', action: '檢查雙出入口開門邏輯' },
+            'C9': { desc: '運轉中，HDC off 3次', level: 'warning', action: '檢查HDC乘場門安全開關，拉樓平後死機' },
+            'CA': { desc: '變頻門機，DERR2', level: 'warning', action: '檢查變頻門機DERR2故障，最多Reset 3次' },
+            'CE': { desc: 'AMC1動作與檢出不一致(0.3S)', level: 'critical', action: '檢查主接觸器AMC1動作及檢出信號' },
+            'CF': { desc: 'AMC2動作與檢出不一致(0.3S)', level: 'critical', action: '檢查主接觸器AMC2動作及檢出信號' },
+            'D2': { desc: 'LS5，LS6動作，系統不是在終端樓', level: 'critical', action: '檢查終端極限開關LS5/LS6及樓層位置' },
+            'D8': { desc: '電梯速度>減速開關下限', level: 'critical', action: '檢查減速開關LS5L/LS7L設定，急減速停車後死機' },
+            'D9': { desc: '電梯速度>1XL/ZXL極限開關速度', level: 'critical', action: '檢查終端極限開關速度限制' },
+            'DA': { desc: '電梯速度>極限開關設定速度', level: 'critical', action: '檢查LS5H、LS7H、DS1~DS8速度設定' },
+            'DB': { desc: 'AMC1動作與檢出不一致(2S)', level: 'critical', action: '檢查主接觸器AMC1，2秒檢出時間' },
+            'DC': { desc: 'AMC2動作與檢出不一致(2S)', level: 'critical', action: '檢查主接觸器AMC2，2秒檢出時間' },
+            'E0': { desc: '拉樓平>3次', level: 'warning', action: '檢查平層系統及LSA/LSB開關' },
+            'E3': { desc: 'DCR、HDC、18DS邏輯錯誤', level: 'critical', action: '檢查門系統邏輯，切CC死機' },
+            'E4': { desc: '電梯速度>設定上限', level: 'critical', action: '檢查速度上限設定INS/WSE，持續0.1S急減速停車' },
+            'E5': { desc: 'BKX，BKXS動作不一致', level: 'critical', action: '檢查煞車二重化開關BKX/BKXS，1秒不一致' },
+            'E6': { desc: 'Slip', level: 'warning', action: '檢查電梯滑移狀況' },
+            'E7': { desc: '電梯BK動作與BLS2動作不一致', level: 'critical', action: '檢查煞車動作與BLS2檢知開關' },
+            'E8': { desc: '電梯BK動作與BLS1動作不一致', level: 'critical', action: '檢查煞車動作與BLS1檢知開關' },
+            'E9': { desc: '樓平開關異常', level: 'warning', action: '檢查LSA或LSB故障，反方向拉樓平' },
+            'ED': { desc: '運轉中，PG變化量相反', level: 'warning', action: '檢查PG計數方向，變化量>20mm' },
+            'EE': { desc: 'Door Zone二重化錯誤', level: 'critical', action: '檢查DZX & DZNX開門區開關，2秒不一致' },
+            'EF': { desc: 'DCR二重化錯誤', level: 'critical', action: '檢查DCR & DCX門全關開關，2秒不一致' },
+            'F0': { desc: '變頻器輸出與PU命令不一致', level: 'critical', action: '檢查變頻器輸出與PU指令同步' },
+            'F1': { desc: '溜車，車廂停在最頂樓', level: 'critical', action: '檢查頂樓溜車狀況及煞車系統' },
+            'F2': { desc: 'PG值超出最低最高樓層', level: 'critical', action: '檢查PG計數範圍，超出PG Over Pulse數' },
+            'F3': { desc: '變頻器PDO CAN BUS timeout>3次', level: 'critical', action: '檢查PDO通訊，C4故障>3次死機' },
+            'F5': { desc: '變頻器連續故障超過3次', level: 'critical', action: '檢查變頻器連續故障原因' },
+            'F6': { desc: 'invBK或InvZSD異常', level: 'critical', action: '檢查變頻器煞車信號及零速信號' },
+            'F7': { desc: '拉不到樓平，電梯已到頂樓', level: 'warning', action: '檢查頂樓平層系統' },
+            'F8': { desc: 'UCMP測試異常', level: 'critical', action: '檢查UCMP煞車制動力測試' },
+            'F9': { desc: '"1C"故障>3次', level: 'warning', action: '參考故障碼1C，連續3次' },
+            'FA': { desc: '2A故障>3次', level: 'warning', action: '參考故障碼2A，連續3次' }
         };
 
-        // Input信號定義 (根據PDF文件)
+        // Input信號定義 (根據PDF文件完整定義)
         const inputSignalDefs = {
             'in0': ['LS3', 'LS4', 'LS5', 'LS6', 'LS7', 'LS8', 'DS13', 'DS18'],
-            'in1': ['PLD', 'PLU', 'WLS1', 'LSB', 'LSA', 'LSBL', 'LDSL', 'DLS'],
+            'in1': ['DLS', 'LDSL', 'LSBL', 'LSA', 'LSB', 'WLS1', 'PLU', 'PLD'],
             'in2': ['can.INVin', 'PU568.DSW1', 'PU568.DSW2', 'PU568.TOLSW', 'BLS', 'INSS', 'KNOR', 'CPINS'],
-            'in3': ['TA12', 'A11', 'A10', 'A4', 'AMC2', 'AMC1', 'BKXS', 'BKS'],
-            'in4': ['CCR', 'DCR', 'DCX', 'HDCX', 'DZN', 'MTH', 'FID', 'Can.Slow']
+            'in3': ['BKS', 'BKXS', 'AMC1', 'AMC2', 'A4', 'A10', 'A11', 'TA12'],
+            'in4': ['Can.Ready', 'Can.RUN+FWD', 'Can.RUN+REV', 'Can.NoR', 'Can.ZSD', 'Can.INS', 'Can.Rescue', 'Can.BKR'],
+            'in5': ['Can.Slow', 'FID', 'MTH', 'DZN', 'HDCX', 'DCX', 'DCR', 'CCR'],
+            'in6': ['HS.DS1&2', 'HS.DS3&4', 'HS.DS5&6', 'HS.DS7&8', 'HS.DS9&10', 'HS.DS11&12', 'HS.DS13&14', 'HS.DS15&16'],
+            'in7': ['PLD.UA', 'PLD.DA', 'PLD.AMC1', 'PLD.AMC2', 'PLD.BK1', 'PLD.BK2', 'PLD.DCX', 'PLD.DCC'],
+            'in8': ['PLD.SMR', 'PLD.CCX', 'PLD.ADT', 'Canoff.BKR', 'Canoff.ZSD', 'Canoff.RDY', 'Can.UCMPTest', 'Can.UPSgen'],
+            'in9': ['PLD.P24', 'PLD.PUPWRON', 'PLD.WDTOK', 'PLD.OUTENB', 'PLD.RST', 'PLD.INCOK', 'PLD.NOR', 'PLD.INS'],
+            'in10': ['PU568.PUSS', 'PU568.PDSS', 'PU568.DOSS', 'PU568.DCSS', 'PU568.BNOR', 'PU568.BINS', 'HS.DS9', 'ZXL(上)'],
+            'in11': ['Extio.BHDC', 'Extio.BDC', 'Extio.BDCR', 'Extio.BDZNX', 'Extio.BLSC', 'Extio.BDS18', 'Extio.BDLS', 'Extio.BLDS']
         };
 
         // Output信號定義
         const outputSignalDefs = {
             'out0': ['BK', 'SBK', 'XMC', 'CCX', 'DCC', 'SMR', 'ADT', 'PU568.BINS'],
-            'out1': ['FSU', 'FSD', 'CANBUSoff', 'vCAN', 'advanceDT', 'Creep', 'extFault', 'LSA&B']
+            'out1': ['LSA&B', 'extFault', 'Creep', 'advanceDT', 'vCANBUSoff', 'FSD', 'FSU', ''],
+            'out2': ['', '', '', '', '', '', '', ''],
+            'out3': ['Extio.BDT', 'Extio.EMG', 'Extio.ERS', 'Extio.DCCB', 'Extio.Xcut', 'Extio.Ren', 'Extio.FIMreturn', 'Extio.SoftDoorZone']
         };
 
-        // InFlag信號定義
+        // InFlag信號定義 (軟體信號狀態)
         const inflagSignalDefs = {
             'inflag0': ['PUF.flag.INS', 'NOR', 'DCN', 'FUSE1', 'PAK', 'XMC2', 'WLS1', 'WLS3'],
             'inflag1': ['LS5/1XL', 'LS6/ZXL', 'WLS8', 'DLYW', 'INS', 'DZN', 'PDT', 'STP'],
-            'inflag2': ['LSA/B', 'LSA/B/C', 'DS18', 'AMC2', 'FUSE2', '', '', '']
+            'inflag2': ['LSA/B', 'LSA/B/C', 'DS18', 'AMC2', 'FUSE2', '', '', ''],
+            'inflag3': ['SM.RY', 'SM.CPINH', 'SM.A', 'SM.B', 'SM.C', 'SM.D', 'SM.E', 'SM.F'],
+            'inflag4': ['SM.canoff', 'SM.CCUTS', 'SM.CarCreep', 'SM.A1', 'SM.A2', 'SM.A3', 'SM.A4', 'SM.A5'],
+            'inflag5': ['SM.A6', 'SM.A7', 'SM.A8', 'SM.A9', 'SM.AA', 'SM.AB', 'SM.AC', 'SM.AD'],
+            'inflag6': ['EMS.UPOS', 'EMS.LTOS1', 'EMS.LTOS2', 'EMS.DPOS', 'EMS.C2L', 'EMS.PAK', 'EMS.EFS', 'EMS.VIP'],
+            'inflag7': ['ELV.ATT', 'ELV.IND', 'ELV.EFS', 'ELV.VIP', 'ELV.HLST', 'ELV.HLDY', 'ELV.C2L', 'ELV.outGP'],
+            'inflag8': ['Op.CPINH', 'Op.KCINH', 'Op.HCINH', 'Op.HCPASS', 'Op.RUNINH', 'Op.HLINH', 'Op.WSEINH', 'Op.DLSINH'],
+            'inflag9': ['Op.LDSINH', 'Op.DOINH', 'Op.OP1', 'Op.OP3', 'Op.OP4', 'DisOp', 'GenPower', 'FirePass'],
+            'inflag10': ['VFCFLROK', 'DLYVFCFLR', 'XMCOFFDLY', 'DIROFFDLY', 'MOREDTS', 'INHH', 'CDOFLV', 'DOF']
         };
+
+        // 關鍵信號定義
+        const criticalSignals = {
+            'input': ['LS3', 'LS4', 'LS5', 'LS6', 'MTH', 'DLS', 'BKS', 'BKXS', 'AMC1', 'AMC2', 'CCR', 'DCR', 'DZN'],
+            'output': ['BK', 'SBK', 'extFault', 'CCX', 'DCC'],
+            'inflag': ['FUSE1', 'FUSE2', 'PAK', 'SM.A', 'SM.B', 'SM.C', 'SM.D', 'SM.E', 'SM.F']
+        };
+
+        // 實時監控變數
+        let realTimeSignalPool = [];
+        let realTimeState = {};
+        let monitoringActive = false;
+        let monitorInterval = null;
+
+        // 頁面載入時設置示例數據
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('faultDate').value = '01/00/00';
+            document.getElementById('faultTime').value = '10:24';
+            document.getElementById('pgPulse').value = '00010000';
+            document.getElementById('currentFloor').value = '1';
+            document.getElementById('targetFloor').value = '3';
+            document.getElementById('inputSignals').value = 'D7,82,31,FE,BE,30,70,0A,B1,33,53';
+            document.getElementById('outputSignals').value = '24,3B,4B,4D,68,C5,2C,11,91,C2,003';
+            document.getElementById('inflagSignals').value = '4D,68,C5,2C,11,91,C2,73,72,02,51';
+            document.getElementById('systemStatus').value = '00000000:0000,00,0000,00,00,00';
+        });
 
         function analyzeFault() {
             const faultCode = document.getElementById('faultCode').value;
             const faultDate = document.getElementById('faultDate').value;
+            const faultTime = document.getElementById('faultTime').value;
             const pgPulse = document.getElementById('pgPulse').value;
             const currentFloor = document.getElementById('currentFloor').value;
+            const targetFloor = document.getElementById('targetFloor').value;
             const inputSignals = document.getElementById('inputSignals').value;
             const outputSignals = document.getElementById('outputSignals').value;
             const inflagSignals = document.getElementById('inflagSignals').value;
@@ -385,7 +879,7 @@
             document.getElementById('resultsSection').style.display = 'block';
 
             // 生成故障概覽
-            generateFaultOverview(faultCode, faultDate, pgPulse, currentFloor);
+            generateFaultOverview(faultCode, faultDate, faultTime, pgPulse, currentFloor, targetFloor);
 
             // 分析I/O信號
             analyzeIOSignals(inputSignals, outputSignals, inflagSignals, systemStatus);
@@ -394,28 +888,29 @@
             document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function generateFaultOverview(faultCode, faultDate, pgPulse, currentFloor) {
+        function generateFaultOverview(faultCode, faultDate, faultTime, pgPulse, currentFloor, targetFloor) {
             const faultInfo = faultCodeDescriptions[faultCode] || { desc: '未知故障', level: 'warning', action: '請查閱故障碼對照表' };
+            const levelText = faultInfo.level === 'critical' ? '嚴重' : (faultInfo.level === 'warning' ? '警告' : '資訊');
+            const indicatorClass = faultInfo.level === 'critical' ? 'error' : (faultInfo.level === 'warning' ? 'warning' : 'ok');
             
             const overview = `
                 <h3>🚨 故障概覽分析</h3>
                 <div class="fault-details">
                     <div class="detail-item">
-                        <strong>故障時間:</strong> ${faultDate || '未指定'}
+                        <strong>故障時間:</strong> ${faultDate || '未指定'} ${faultTime || ''}
+                    </div>
+                    <div class="detail-item" style="grid-column: span 2;">
+                        <strong>故障碼:</strong> ${faultCode} - ${faultInfo.desc}
                     </div>
                     <div class="detail-item">
-                        <strong>故障碼:</strong> ${faultCode}
-                    </div>
-                    <div class="detail-item">
-                        <strong>故障說明:</strong> ${faultInfo.desc}
-                    </div>
-                    <div class="detail-item">
-                        <strong>故障等級:</strong> 
-                        <span class="status-indicator status-${faultInfo.level === 'critical' ? 'error' : 'warning'}"></span>
-                        ${faultInfo.level === 'critical' ? '嚴重' : '警告'}
+                        <strong>故障等級:</strong>
+                        <span class="status-indicator status-${indicatorClass}"></span>${levelText}
                     </div>
                     <div class="detail-item">
                         <strong>當前樓層:</strong> ${currentFloor || '未指定'}F
+                    </div>
+                    <div class="detail-item">
+                        <strong>目標樓層:</strong> ${targetFloor || '未指定'}F
                     </div>
                     <div class="detail-item">
                         <strong>PG Pulse:</strong> ${pgPulse || '未指定'}
@@ -431,22 +926,21 @@
 
         function analyzeIOSignals(inputSignals, outputSignals, inflagSignals, systemStatus) {
             const ioAnalysisDiv = document.getElementById('ioAnalysis');
-            
             let analysisHTML = '';
 
             // 分析Input信號
             if (inputSignals) {
-                analysisHTML += generateIOSection('Input信號狀態', inputSignals, inputSignalDefs, 'input');
+                analysisHTML += generateIOSection('🔌 Input信號狀態', inputSignals, inputSignalDefs, 'input');
             }
 
             // 分析Output信號
             if (outputSignals) {
-                analysisHTML += generateIOSection('Output信號狀態', outputSignals, outputSignalDefs, 'output');
+                analysisHTML += generateIOSection('📤 Output信號狀態', outputSignals, outputSignalDefs, 'output');
             }
 
             // 分析InFlag信號
             if (inflagSignals) {
-                analysisHTML += generateIOSection('InFlag信號狀態', inflagSignals, inflagSignalDefs, 'inflag');
+                analysisHTML += generateIOSection('🏁 InFlag信號狀態', inflagSignals, inflagSignalDefs, 'inflag');
             }
 
             // 系統狀態分析
@@ -460,42 +954,46 @@
         function generateIOSection(title, signalData, signalDefs, type) {
             const signals = signalData.split(',').map(s => s.trim());
             let sectionHTML = `<div class="io-section"><h4>${title}</h4><div class="io-content">`;
-            
-            let criticalSignals = [];
+            let criticalSignalsFound = [];
 
             Object.keys(signalDefs).forEach((key, index) => {
                 if (index < signals.length) {
                     const hexValue = signals[index];
-                    const binaryValue = parseInt(hexValue, 16).toString(2).padStart(8, '0');
-                    
+                    const byteInt = parseInt(hexValue, 16);
+                    const binaryValue = isNaN(byteInt) ? '00000000' : byteInt.toString(2).padStart(8, '0');
+
                     sectionHTML += `
-                        <div style="margin-bottom: 20px;">
-                            <strong>${key.toUpperCase()} (${hexValue})</strong>
+                        <div class="signal-group">
+                            <div class="signal-group-header">
+                                <span>${key.toUpperCase()} (0x${hexValue})</span>
+                                <span>Binary: ${binaryValue}</span>
+                            </div>
                             <div class="signal-grid">
                     `;
-                    
-                    for (let i = 0; i < 8; i++) {
-                        const bitValue = binaryValue[7-i];
-                        const signalName = signalDefs[key][i] || `Bit${i}`;
+
+                    for (let bit = 0; bit < 8; bit++) {
+                        const bitValue = binaryValue[bit];
+                        const signalName = signalDefs[key][bit] || `Bit${bit}`;
                         const isActive = bitValue === '1';
+                        const isCritical = isCriticalSignal(signalName, type);
                         
+                        if (isActive && isCritical) {
+                            criticalSignalsFound.push(`${signalName}: 異常動作`);
+                        }
+
                         sectionHTML += `
-                            <div class="signal-bit ${isActive ? 'active' : 'inactive'}" 
+                            <div class="signal-bit ${isActive ? 'active' : 'inactive'} ${isActive && isCritical ? 'critical' : ''}" 
+                                 data-tooltip="${signalName}: ${isActive ? 'ON' : 'OFF'} ${isCritical ? '(關鍵信號)' : ''}"
                                  title="${signalName}: ${isActive ? 'ON' : 'OFF'}">
-                                ${bitValue}
+                                ${signalName}
                             </div>
                         `;
-                        
-                        // 檢查關鍵信號
-                        if (isActive && isCriticalSignal(signalName, type)) {
-                            criticalSignals.push(`${signalName}: 異常動作`);
-                        }
                     }
-                    
+
                     sectionHTML += `
                             </div>
                             <div class="signal-description">
-                                信號定義: ${signalDefs[key].join(', ')}
+                                <strong>信號定義:</strong> ${signalDefs[key].join(', ')}
                             </div>
                         </div>
                     `;
@@ -503,12 +1001,12 @@
             });
 
             // 添加關鍵信號警告
-            if (criticalSignals.length > 0) {
+            if (criticalSignalsFound.length > 0) {
                 sectionHTML += `
                     <div class="critical-signals">
                         <h5>⚠️ 關鍵信號異常</h5>
                         <ul class="critical-list">
-                            ${criticalSignals.map(signal => `<li>${signal}</li>`).join('')}
+                            ${criticalSignalsFound.map(signal => `<li>🔴 ${signal}</li>`).join('')}
                         </ul>
                     </div>
                 `;
@@ -519,15 +1017,31 @@
         }
 
         function generateSystemStatusSection(systemStatus) {
+            const statusParts = systemStatus.split(':');
+            const startPG = statusParts[0] || '00000000';
+            const otherStatus = statusParts[[1]](#__1) || '0000,00,0000,00,00,00';
+            
             return `
                 <div class="io-section">
-                    <h4>系統狀態信息</h4>
+                    <h4>⚙️ 系統狀態信息</h4>
                     <div class="io-content">
-                        <div class="detail-item">
-                            <strong>系統狀態碼:</strong> ${systemStatus}
+                        <div class="signal-group">
+                            <div class="signal-group-header">
+                                <span>Start PG</span>
+                                <span>${startPG}</span>
+                            </div>
+                            <div class="signal-description">
+                                PG起始計數值
+                            </div>
                         </div>
-                        <div class="signal-description">
-                            包含Start PG、SYSM狀態、變頻器速度、鋼索補償旗標、平層旗標等系統運行參數
+                        <div class="signal-group">
+                            <div class="signal-group-header">
+                                <span>其他狀態參數</span>
+                                <span>${otherStatus}</span>
+                            </div>
+                            <div class="signal-description">
+                                包含SYSM狀態、變頻器速度、鋼索補償旗標、平層旗標等系統運行參數
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -535,43 +1049,56 @@
         }
 
         function isCriticalSignal(signalName, type) {
-            const criticalSignals = {
-                'input': ['LS3', 'LS4', 'LS5', 'LS6', 'MTH', 'DLS', 'BKS', 'BKXS'],
-                'output': ['BK', 'SBK', 'extFault'],
-                'inflag': ['FUSE1', 'FUSE2', 'PAK']
-            };
-            
             return criticalSignals[type] && criticalSignals[type].includes(signalName);
         }
 
-                // 頁面載入時設置示例數據
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('faultDate').value = '01/00/00';
-            document.getElementById('pgPulse').value = '00010000';
-            document.getElementById('currentFloor').value = '1';
-            document.getElementById('inputSignals').value = 'D7,82,31,FE,BE,30,70,0A,B1,33,53';
-            document.getElementById('outputSignals').value = '24,3B,4B,4D,68,C5,2C,11,91,C2,003';
-            document.getElementById('inflagSignals').value = '4D,68,C5,2C,11,91,C2,73,72,02,51';
-            document.getElementById('systemStatus').value = '00000000:00,00,00,0000,00,00,00';
-        });
+        function enhancedAnalyzeFault() {
+            // 執行基本分析
+            analyzeFault();
 
-        // 新增功能：故障趨勢分析
+            // 添加增強功能
+            const faultCode = document.getElementById('faultCode').value;
+            const inputSignals = document.getElementById('inputSignals').value;
+            const outputSignals = document.getElementById('outputSignals').value;
+
+            const faultOverview = document.getElementById('faultOverview');
+            const currentHTML = faultOverview.innerHTML;
+            
+            const enhancedHTML = currentHTML + 
+                generateFaultTrendAnalysis(faultCode) +
+                generateMaintenanceAdvice(faultCode, inputSignals, outputSignals) +
+                generateSafetyAssessment(faultCode);
+            
+            faultOverview.innerHTML = enhancedHTML;
+        }
+
         function generateFaultTrendAnalysis(faultCode) {
             const trendData = {
-                '2C': { frequency: 'high', trend: 'increasing', related: ['2B', '2E'] },
-                '11': { frequency: 'critical', trend: 'stable', related: ['E5', 'E7', 'E8'] },
-                '13': { frequency: 'medium', trend: 'decreasing', related: ['31', '32', '39'] },
-                'C4': { frequency: 'high', trend: 'increasing', related: ['A1', 'A8', 'F3'] }
+                '2C': { frequency: 'high', trend: 'increasing', related: ['2B', '2E', 'WSE'] },
+                '11': { frequency: 'critical', trend: 'stable', related: ['E5', 'E7', 'E8', 'BK'] },
+                '13': { frequency: 'medium', trend: 'decreasing', related: ['31', '32', '39', 'Ready'] },
+                'C4': { frequency: 'high', trend: 'increasing', related: ['A1', 'A8', 'F3', 'CAN'] },
+                'B2': { frequency: 'medium', trend: 'stable', related: ['34', '3A', 'MTH'] },
+                'E3': { frequency: 'low', trend: 'stable', related: ['25', '27', '29', 'Door'] },
+                '35': { frequency: 'low', trend: 'decreasing', related: ['D8', 'D9', 'DA', 'Speed'] }
             };
 
             const trend = trendData[faultCode];
             if (trend) {
                 return `
-                    <div class="trend-analysis">
+                    <div class="enhancement-section">
                         <h5>📈 故障趨勢分析</h5>
-                        <p><strong>發生頻率:</strong> ${getTrendText(trend.frequency)}</p>
-                        <p><strong>趨勢:</strong> ${getTrendText(trend.trend)}</p>
-                        <p><strong>相關故障:</strong> ${trend.related.join(', ')}</p>
+                        <div class="fault-details">
+                            <div class="detail-item">
+                                <strong>發生頻率:</strong> ${getTrendText(trend.frequency)}
+                            </div>
+                            <div class="detail-item">
+                                <strong>趨勢:</strong> ${getTrendText(trend.trend)}
+                            </div>
+                            <div class="detail-item" style="grid-column: span 2;">
+                                <strong>相關故障:</strong> ${trend.related.join(', ')}
+                            </div>
+                        </div>
                     </div>
                 `;
             }
@@ -580,44 +1107,72 @@
 
         function getTrendText(type) {
             const texts = {
-                'high': '高頻',
-                'medium': '中頻',
-                'low': '低頻',
-                'critical': '極高',
-                'increasing': '上升趨勢',
-                'stable': '穩定',
-                'decreasing': '下降趨勢'
+                'high': '高頻發生',
+                'medium': '中頻發生',
+                'low': '低頻發生',
+                'critical': '極高頻',
+                'increasing': '上升趨勢 📈',
+                'stable': '穩定狀態 ➡️',
+                'decreasing': '下降趨勢 📉'
             };
             return texts[type] || type;
         }
 
-        // 新增功能：維修建議生成器
         function generateMaintenanceAdvice(faultCode, inputSignals, outputSignals) {
             const adviceMap = {
                 '2C': [
                     '檢查鋼索張力是否適當',
-                    '確認鋼索補償參數設定',
+                    '確認鋼索補償參數設定 (WSE參數)',
                     '檢查WSE系統運作狀況',
-                    '測量鋼索伸長量'
+                    '測量鋼索伸長量是否超標',
+                    '調整補償速度參數'
                 ],
                 '11': [
-                    '立即檢查煞車系統',
+                    '立即檢查煞車系統安全性',
                     '確認BLS1/BLS2煞車檢知開關',
-                    '檢查煞車線圈電壓',
-                    '測試煞車制動力'
+                    '檢查煞車線圈電壓及電流',
+                    '測試煞車制動力是否足夠',
+                    '檢查煞車片磨損狀況'
                 ],
                 '13': [
-                    '檢查變頻器Ready信號',
-                    '確認變頻器電源供應',
+                    '檢查變頻器Ready信號線路',
+                    '確認變頻器電源供應穩定性',
                     '檢查變頻器參數設定',
-                    '測試變頻器通訊'
+                    '測試變頻器通訊功能',
+                    '檢查變頻器散熱系統'
+                ],
+                'C4': [
+                    '檢查PDO CAN通訊線路',
+                    '確認CAN通訊參數設定',
+                    '檢查CAN終端電阻',
+                    '測試通訊速率設定',
+                    '檢查通訊線路屏蔽'
+                ],
+                'B2': [
+                    '檢查馬達散熱風扇運作',
+                    '確認環境溫度是否過高',
+                    '檢查馬達負載是否正常',
+                    '清潔馬達散熱片',
+                    '檢查MTH保護設定值'
+                ],
+                'E3': [
+                    '檢查DCR門全關開關',
+                    '確認HDC乘場門安全開關',
+                    '檢查18DS門開到底開關',
+                    '測試門系統邏輯電路',
+                    '檢查門機械結構'
                 ]
             };
 
-            const advice = adviceMap[faultCode] || ['請參考故障碼對照表進行檢修'];
+            const advice = adviceMap[faultCode] || [
+                '請參考故障碼對照表進行檢修',
+                '檢查相關I/O信號狀態',
+                '確認系統參數設定',
+                '聯絡技術支援'
+            ];
             
             return `
-                <div class="maintenance-advice">
+                <div class="enhancement-section maintenance-advice">
                     <h5>🔧 維修建議</h5>
                     <ol>
                         ${advice.map(item => `<li>${item}</li>`).join('')}
@@ -626,215 +1181,255 @@
             `;
         }
 
-        // 新增功能：安全評估
-        function generateSafetyAssessment(faultCode, signals) {
+        function generateSafetyAssessment(faultCode) {
             const safetyLevels = {
-                'critical': { level: '極危險', color: '#e74c3c', action: '立即停止運轉' },
-                'high': { level: '高危險', color: '#f39c12', action: '限制運轉' },
-                'medium': { level: '中等風險', color: '#f1c40f', action: '監控運轉' },
-                'low': { level: '低風險', color: '#27ae60', action: '正常運轉' }
+                'critical': { 
+                    level: '極危險', 
+                    color: '#e74c3c', 
+                    action: '立即停止運轉，禁止載客',
+                    icon: '🚨'
+                },
+                'high': { 
+                    level: '高危險', 
+                    color: '#f39c12', 
+                    action: '限制運轉，加強監控',
+                    icon: '⚠️'
+                },
+                'medium': { 
+                    level: '中等風險', 
+                    color: '#f1c40f', 
+                    action: '持續監控運轉狀況',
+                    icon: '⚡'
+                },
+                'low': { 
+                    level: '低風險', 
+                    color: '#27ae60', 
+                    action: '正常運轉，定期檢查',
+                    icon: '✅'
+                }
             };
 
             let safetyLevel = 'low';
             
             // 根據故障碼判定安全等級
-            if (['11', '20', '21', '35', 'B2', 'E3'].includes(faultCode)) {
+            const criticalCodes = ['11', '20', '21', '35', 'B2', 'E3', '24', '19', '3E', 'CE', 'CF'];
+            const highCodes = ['13', '31', '2C', 'C4', 'A1', 'F2', 'E5', 'E7', 'E8'];
+            const mediumCodes = ['12', '25', '27', '2A', '2B', 'A4', 'A5', 'B3', 'B4'];
+            
+            if (criticalCodes.includes(faultCode)) {
                 safetyLevel = 'critical';
-            } else if (['13', '31', '2C', 'C4'].includes(faultCode)) {
+            } else if (highCodes.includes(faultCode)) {
                 safetyLevel = 'high';
-            } else if (['12', '25', '27'].includes(faultCode)) {
+            } else if (mediumCodes.includes(faultCode)) {
                 safetyLevel = 'medium';
             }
 
             const safety = safetyLevels[safetyLevel];
             
             return `
-                <div class="safety-assessment" style="border-left: 4px solid ${safety.color};">
+                <div class="enhancement-section" style="border-left: 4px solid ${safety.color};">
                     <h5>🛡️ 安全評估</h5>
-                    <p><strong>風險等級:</strong> 
-                        <span style="color: ${safety.color}; font-weight: bold;">${safety.level}</span>
-                    </p>
-                    <p><strong>建議動作:</strong> ${safety.action}</p>
+                    <div class="fault-details">
+                        <div class="detail-item">
+                            <strong>風險等級:</strong> 
+                            <span style="color: ${safety.color}; font-weight: bold;">${safety.icon} ${safety.level}</span>
+                        </div>
+                        <div class="detail-item" style="grid-column: span 2;">
+                            <strong>建議動作:</strong> ${safety.action}
+                        </div>
+                    </div>
                 </div>
             `;
         }
 
-        // 更新分析函數以包含新功能
-        function enhancedAnalyzeFault() {
+        // 實時監控功能
+        function buildRealTimeSignalPool() {
+            const collect = new Set();
+            [inputSignalDefs, outputSignalDefs, inflagSignalDefs].forEach(group => {
+                Object.values(group).forEach(arr => {
+                    arr.forEach(sig => { 
+                        if (sig && sig.trim() && sig !== '') {
+                            collect.add(sig);
+                        }
+                    });
+                });
+            });
+            
+            // 補充常用關鍵信號
+            ['Ready', 'ZSD', 'BK', 'SBK', 'DCR', 'HDC', '18DS', 'CAN', 'PDO', 'FUSE1', 'FUSE2', 'AMC1', 'AMC2'].forEach(s => collect.add(s));
+            
+            realTimeSignalPool = Array.from(collect).sort();
+            realTimeSignalPool.forEach(sig => { 
+                realTimeState[sig] = Math.random() > 0.7; 
+            });
+        }
+
+        function startRealTimeMonitoring() {
+            if (monitoringActive) return;
+            monitoringActive = true;
+            buildRealTimeSignalPool();
+
+            const container = document.getElementById('ioAnalysis');
+            const monitorDiv = document.createElement('div');
+            monitorDiv.className = 'real-time-monitor';
+            monitorDiv.id = 'realTimeMonitor';
+            monitorDiv.innerHTML = `
+                <h4>📡 實時信號監控</h4>
+                <div class="monitor-controls" style="margin-bottom:15px;">
+                    <button class="btn btn-success" onclick="toggleAllSignals(true)">🟢 全部 ON</button>
+                    <button class="btn btn-warning" onclick="toggleAllSignals(false)">🔴 全部 OFF</button>
+                    <button class="btn btn-danger" onclick="stopMonitoring()">⏹️ 停止監控</button>
+                    <button class="btn" onclick="exportCurrentSignals()">📄 匯出狀態</button>
+                </div>
+                <div class="rt-grid" id="rtGrid"></div>
+                <div style="font-size:12px;color:#666;text-align:center;margin-top:10px;">
+                    🟢 綠色=ON  / ⚪ 灰色=OFF  / 🔴 紅色=關鍵信號ON
+                </div>
+            `;
+            container.appendChild(monitorDiv);
+
+            const grid = monitorDiv.querySelector('#rtGrid');
+            grid.innerHTML = realTimeSignalPool.map(sig => {
+                const isCritical = isCriticalSignal(sig, 'input') || isCriticalSignal(sig, 'output') || isCriticalSignal(sig, 'inflag');
+                return `
+                    <div class="rt-signal ${realTimeState[sig] ? 'on' : 'off'} ${isCritical ? 'critical' : ''}" 
+                         data-signal="${sig}" 
+                         title="${sig} - ${realTimeState[sig] ? 'ON' : 'OFF'} ${isCritical ? '(關鍵信號)' : ''}"
+                         onclick="toggleSignal('${sig}')">${sig}</div>
+                `;
+            }).join('');
+
+            monitorInterval = setInterval(simulateSignalFluctuation, 2000);
+        }
+
+        function simulateSignalFluctuation() {
+            const flipCount = Math.floor(3 + Math.random() * 8);
+            for (let i = 0; i < flipCount; i++) {
+                const sig = realTimeSignalPool[Math.floor(Math.random() * realTimeSignalPool.length)];
+                realTimeState[sig] = !realTimeState[sig];
+                updateRealTimeSignalElement(sig);
+            }
+        }
+
+        function updateRealTimeSignalElement(sig) {
+            const el = document.querySelector(`.rt-signal[data-signal="${sig}"]`);
+            if (!el) return;
+            el.classList.toggle('on', realTimeState[sig]);
+            el.classList.toggle('off', !realTimeState[sig]);
+            el.title = `${sig} - ${realTimeState[sig] ? 'ON' : 'OFF'} ${el.classList.contains('critical') ? '(關鍵信號)' : ''}`;
+        }
+
+        function toggleSignal(sig) {
+            realTimeState[sig] = !realTimeState[sig];
+            updateRealTimeSignalElement(sig);
+        }
+
+        function toggleAllSignals(state) {
+            realTimeSignalPool.forEach(sig => {
+                realTimeState[sig] = state;
+                updateRealTimeSignalElement(sig);
+            });
+        }
+
+        function stopMonitoring() {
+            monitoringActive = false;
+            if (monitorInterval) clearInterval(monitorInterval);
+            const div = document.getElementById('realTimeMonitor');
+            if (div) div.remove();
+        }
+
+        function exportCurrentSignals() {
+            const onSignals = realTimeSignalPool.filter(sig => realTimeState[sig]);
+            const offSignals = realTimeSignalPool.filter(sig => !realTimeState[sig]);
+            const criticalOnSignals = onSignals.filter(sig => 
+                isCriticalSignal(sig, 'input') || isCriticalSignal(sig, 'output') || isCriticalSignal(sig, 'inflag')
+            );
+            
+            const content = [
+                '=== 電梯實時信號狀態快照 ===',
+                `匯出時間: ${new Date().toLocaleString()}`,
+                '',
+                `總信號數: ${realTimeSignalPool.length}`,
+                `ON信號數: ${onSignals.length}`,
+                `OFF信號數: ${offSignals.length}`,
+                `關鍵信號ON: ${criticalOnSignals.length}`,
+                '',
+                '=== ON狀態信號 ===',
+                ...onSignals.map(sig => `✅ ${sig}`),
+                '',
+                '=== OFF狀態信號 ===',
+                ...offSignals.map(sig => `❌ ${sig}`),
+                '',
+                '=== 關鍵信號ON (需注意) ===',
+                ...criticalOnSignals.map(sig => `🚨 ${sig}`)
+            ].join('\n');
+            
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `電梯信號狀態_${new Date().toISOString().slice(0,16).replace('T', '_')}.txt`;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }
+
+        function generateFaultReport() {
             const faultCode = document.getElementById('faultCode').value;
             const faultDate = document.getElementById('faultDate').value;
-            const pgPulse = document.getElementById('pgPulse').value;
+            const faultTime = document.getElementById('faultTime').value;
             const currentFloor = document.getElementById('currentFloor').value;
+            const targetFloor = document.getElementById('targetFloor').value;
+            const pgPulse = document.getElementById('pgPulse').value;
             const inputSignals = document.getElementById('inputSignals').value;
             const outputSignals = document.getElementById('outputSignals').value;
             const inflagSignals = document.getElementById('inflagSignals').value;
             const systemStatus = document.getElementById('systemStatus').value;
-
-            // 原有分析功能
-            analyzeFault();
-
-            // 添加增強功能到概覽中
-            const faultOverview = document.getElementById('faultOverview');
-            const currentHTML = faultOverview.innerHTML;
             
-            const enhancedHTML = currentHTML + 
-                generateFaultTrendAnalysis(faultCode) +
-                generateMaintenanceAdvice(faultCode, inputSignals, outputSignals) +
-                generateSafetyAssessment(faultCode, { inputSignals, outputSignals });
+            const faultInfo = faultCodeDescriptions[faultCode] || { desc: '未知故障', level: 'warning', action: '請查閱維修手冊' };
             
-            faultOverview.innerHTML = enhancedHTML;
-        }
-
-        // 新增：實時信號監控模擬
-        function startRealTimeMonitoring() {
-            const monitoringDiv = document.createElement('div');
-            monitoringDiv.className = 'real-time-monitor';
-            monitoringDiv.innerHTML = `
-                <h4>📡 實時信號監控</h4>
-                <div id="signalUpdates"></div>
-                <button onclick="stopMonitoring()" class="analyze-btn">停止監控</button>
-            `;
+            const reportContent = [
+                '========================================',
+                '        電梯故障分析報告',
+                '        PU568 OBM 系統',
+                '========================================',
+                '',
+                '【基本信息】',
+                `故障時間: ${faultDate} ${faultTime}`,
+                `故障碼: ${faultCode}`,
+                `故障描述: ${faultInfo.desc}`,
+                `故障等級: ${faultInfo.level === 'critical' ? '嚴重' : faultInfo.level === 'warning' ? '警告' : '資訊'}`,
+                `當前樓層: ${currentFloor}F`,
+                `目標樓層: ${targetFloor}F`,
+                `PG Pulse: ${pgPulse}`,
+                '',
+                '【I/O信號狀態】',
+                `Input信號: ${inputSignals}`,
+                `Output信號: ${outputSignals}`,
+                `InFlag信號: ${inflagSignals}`,
+                `系統狀態: ${systemStatus}`,
+                '',
+                '【維修建議】',
+                faultInfo.action,
+                '',
+                '【注意事項】',
+                '1. 請在確保安全的前提下進行檢修',
+                '2. 檢修前請切斷電源並掛牌上鎖',
+                '3. 檢修後請進行功能測試',
+                '4. 記錄檢修過程和結果',
+                '',
+                `報告生成時間: ${new Date().toLocaleString()}`,
+                '報告生成系統: 電梯故障I/O狀態分析系統',
+                '========================================'
+            ].join('\n');
             
-            document.getElementById('ioAnalysis').appendChild(monitoringDiv);
-            
-            // 模擬信號更新
-            window.monitoringInterval = setInterval(updateSignals, 2000);
-        }
-
-        function updateSignals() {
-            const updatesDiv = document.getElementById('signalUpdates');
-            const timestamp = new Date().toLocaleTimeString();
-            const randomSignal = ['DCR', 'HDC', 'BK', 'Ready', 'ZSD'][Math.floor(Math.random() * 5)];
-            const status = Math.random() > 0.7 ? 'ON' : 'OFF';
-            
-            const update = document.createElement('div');
-            update.innerHTML = `
-                <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                    <span style="color: #7f8c8d;">[${timestamp}]</span> 
-                    <strong>${randomSignal}</strong>: ${status}
-                </div>
-            `;
-            
-            updatesDiv.insertBefore(update, updatesDiv.firstChild);
-            
-            // 保持最新10條記錄
-            if (updatesDiv.children.length > 10) {
-                updatesDiv.removeChild(updatesDiv.lastChild);
-            }
-        }
-
-        function stopMonitoring() {
-            if (window.monitoringInterval) {
-                clearInterval(window.monitoringInterval);
-                const monitorDiv = document.querySelector('.real-time-monitor');
-                if (monitorDiv) {
-                    monitorDiv.remove();
-                }
-            }
-        }
-
-        // 新增：故障報告生成
-        function generateFaultReport() {
-            const faultCode = document.getElementById('faultCode').value;
-            const faultDate = document.getElementById('faultDate').value;
-            const currentFloor = document.getElementById('currentFloor').value;
-            
-            const reportContent = `
-                ===== 電梯故障分析報告 =====
-                故障時間: ${faultDate}
-                故障碼: ${faultCode}
-                故障描述: ${faultCodeDescriptions[faultCode]?.desc || '未知故障'}
-                當前樓層: ${currentFloor}F
-                
-                I/O信號狀態:
-                Input: ${document.getElementById('inputSignals').value}
-                Output: ${document.getElementById('outputSignals').value}
-                InFlag: ${document.getElementById('inflagSignals').value}
-                
-                建議處理: ${faultCodeDescriptions[faultCode]?.action || '請查閱維修手冊'}
-                
-                報告生成時間: ${new Date().toLocaleString()}
-                ================================
-            `;
-            
-            // 創建下載鏈接
-            const blob = new Blob([reportContent], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
             const a = document.createElement('a');
-            a.href = url;
+            a.href = URL.createObjectURL(blob);
             a.download = `電梯故障報告_${faultCode}_${new Date().toISOString().slice(0,10)}.txt`;
             a.click();
-            window.URL.revokeObjectURL(url);
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
         }
-
-        // 在分析按鈕旁添加新功能按鈕
-        document.addEventListener('DOMContentLoaded', function() {
-            // 原有的示例數據設置...
-            
-            // 添加功能按鈕
-            const buttonContainer = document.querySelector('.fault-input-section');
-            const additionalButtons = document.createElement('div');
-            additionalButtons.style.marginTop = '15px';
-            additionalButtons.innerHTML = `
-                <button class="analyze-btn" onclick="enhancedAnalyzeFault()" style="margin-right: 10px;">
-                    🔍 增強分析
-                </button>
-                <button class="analyze-btn" onclick="startRealTimeMonitoring()" style="margin-right: 10px;">
-                    📡 實時監控
-                </button>
-                <button class="analyze-btn" onclick="generateFaultReport()">
-                    📄 生成報告
-                </button>
-            `;
-            
-            buttonContainer.appendChild(additionalButtons);
-        });
     </script>
-
-    <style>
-        .trend-analysis, .maintenance-advice, .safety-assessment {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        
-        .trend-analysis h5, .maintenance-advice h5, .safety-assessment h5 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .maintenance-advice ol {
-            padding-left: 20px;
-        }
-        
-        .maintenance-advice li {
-            margin: 5px 0;
-            line-height: 1.4;
-        }
-        
-        .real-time-monitor {
-            background: #fff;
-            border: 2px solid #3498db;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        
-        .real-time-monitor h4 {
-            color: #3498db;
-            margin-bottom: 15px;
-        }
-        
-        #signalUpdates {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 15px;
-            background: #f8f9fa;
-        }
-    </style>
 </body>
 </html>
+
+
