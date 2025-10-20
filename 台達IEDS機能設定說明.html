@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台達電梯一體機 IED-S 系列 - 電梯機能設定使用說明</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 固定頂部導航 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 8px 35px 8px 15px;
+            border: none;
+            border-radius: 20px;
+            width: 250px;
+            font-size: 14px;
+        }
+
+        .search-box button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .search-box button:hover {
+            background: #1e3c72;
+        }
+
+        .category-select {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+        }
+
+        .home-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .home-btn:hover {
+            background: #ee5a52;
+        }
+
+        /* 主內容區 */
+        .container {
+            max-width: 210mm; /* A4 寬度 */
+            margin: 100px auto 30px;
+            background: white;
+            padding: 20mm; /* A4 邊距 */
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            min-height: 297mm; /* A4 高度 */
+        }
+
+        /* 目錄 */
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .toc h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .toc li:last-child {
+            border-bottom: none;
+        }
+
+        .toc a {
+            color: #2a5298;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #ff6b6b;
+            text-decoration: underline;
+        }
+
+        /* 章節樣式 */
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2a5298;
+        }
+
+        .section h3 {
+            color: #2a5298;
+            font-size: 1.4em;
+            margin: 25px 0 15px;
+        }
+
+        .section h4 {
+            color: #555;
+            font-size: 1.2em;
+            margin: 20px 0 10px;
+        }
+
+        /* 參數表格 */
+        .param-box {
+            background: #f8f9fa;
+            border-left: 4px solid #2a5298;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .param-box strong {
+            color: #1e3c72;
+            font-size: 1.1em;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .param-detail {
+            margin-left: 15px;
+        }
+
+        .param-detail div {
+            margin: 5px 0;
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
+        table th {
+            background: #2a5298;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* 列表樣式 */
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        /* 注意事項 */
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .note strong {
+            color: #856404;
+        }
+
+        .warning {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning strong {
+            color: #721c24;
+        }
+
+        /* 索引標記 */
+        .index-mark {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        /* 搜尋高亮 */
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        /* 無結果提示 */
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        /* 列印樣式 */
+        @media print {
+            .header, .home-btn, .search-box, .category-select {
+                display: none;
+            }
+
+            .container {
+                margin: 0;
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 90px 10px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .search-box input {
+                width: 180px;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+        }
+
+        /* 返回頂部按鈕 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2a5298;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .back-to-top:hover {
+            background: #1e3c72;
+            transform: translateY(-5px);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <!-- 固定頂部導航 -->
+    <div class="header">
+        <div class="header-content">
+            <h1>🏢 台達電梯一體機 IED-S 系列 - 電梯機能設定使用說明</h1>
+            <div class="header-controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜尋關鍵字...">
+                    <button onclick="searchContent()">🔍</button>
+                </div>
+                <select class="category-select" id="categorySelect" onchange="filterCategory()">
+                    <option value="all">📂 所有類別</option>
+                    <option value="basic">基本系統設定</option>
+                    <option value="operation">運行模式設定</option>
+                    <option value="special">特殊運行模式</option>
+                    <option value="safety">安全功能設定</option>
+                    <option value="group">群控功能設定</option>
+                    <option value="door">門控功能設定</option>
+                    <option value="speed">速度與運行控制</option>
+                    <option value="protection">保護功能設定</option>
+                    <option value="brake">煞車制動力測試</option>
+                    <option value="other">其他功能設定</option>
+                    <option value="test">系統測試功能</option>
+                    <option value="maintenance">系統維護功能</option>
+                    <option value="monitor">監控與診斷</option>
+                    <option value="guide">快速設定指南</option>
+                </select>
+                <button class="home-btn" onclick="scrollToTop()">🏠 回首頁</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主內容區 -->
+    <div class="container">
+        <!-- 目錄 -->
+        <div class="toc">
+            <h2>📑 目錄</h2>
+            <ul>
+                <li><a href="#section1">一、基本系統設定</a></li>
+                <li><a href="#section2">二、運行模式設定</a></li>
+                <li><a href="#section3">三、特殊運行模式</a></li>
+                <li><a href="#section4">四、安全功能設定</a></li>
+                <li><a href="#section5">五、群控功能設定</a></li>
+                <li><a href="#section6">六、門控功能設定</a></li>
+                <li><a href="#section7">七、速度與運行控制</a></li>
+                <li><a href="#section8">八、保護功能設定</a></li>
+                <li><a href="#section9">九、煞車制動力測試</a></li>
+                <li><a href="#section10">十、其他功能設定</a></li>
+                <li><a href="#section11">十一、系統測試功能</a></li>
+                <li><a href="#section12">十二、系統維護功能</a></li>
+                <li><a href="#section13">十三、監控與診斷</a></li>
+                <li><a href="#section14">十四、快速設定指南</a></li>
+            </ul>
+        </div>
+
+        <!-- 一、基本系統設定 -->
+        <div class="section" id="section1" data-category="basic">
+            <h2>一、基本系統設定</h2>
+            
+            <h3>1.1 物理樓層設定<span class="index-mark">[[220]](#__220)[[225]](#__225)</span></h3>
+            
+            <div class="param-box">
+                <strong>參數 03-01 物理最高層</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：1~64F</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 說明：設定電梯服務的最高物理樓層</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-02 物理最低層</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：1~64F</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 說明：設定電梯服務的最低物理樓層</div>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>📌 設定範例：</strong><br>
+                若實際樓層為 B1F~10F，則：
+                <ul>
+                    <li>物理最低層 = 1（代表 B1F）</li>
+                    <li>物理最高層 = 11（代表 10F）</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ 群控注意事項<span class="index-mark">[[225]](#__225)[[226]](#__226)</span>：</strong><br>
+                群控時需以所有電梯的最高最低物理樓層設定
+                <table>
+                    <tr>
+                        <th>範例</th>
+                        <th>電梯 1 樓層</th>
+                        <th>電梯 2 樓層</th>
+                        <th>物理最低層</th>
+                        <th>物理最高層</th>
+                    </tr>
+                    <tr>
+                        <td>單控</td>
+                        <td>B1F~9F</td>
+                        <td>1F~10F</td>
+                        <td>1 / 1</td>
+                        <td>10 / 10</td>
+                    </tr>
+                    <tr>
+                        <td>群控</td>
+                        <td>B1F~9F</td>
+                        <td>1F~10F</td>
+                        <td>1 / 1</td>
+                        <td>11 / 11</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>1.2 服務樓層設定<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-11 服務樓層 16~1</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535</div>
+                    <div>• 出廠值：65535（全部服務）</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-12 服務樓層 32~17</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535</div>
+                    <div>• 出廠值：65535</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-13 服務樓層 48~33</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535</div>
+                    <div>• 出廠值：65535</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-14 服務樓層 64~49</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535</div>
+                    <div>• 出廠值：65535</div>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>📌 設定方式：</strong>使用 Bit 位元控制各樓層是否服務
+                <ul>
+                    <li>Bit 0 = 1：服務該樓層</li>
+                    <li>Bit 0 = 0：不服務該樓層</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 二、運行模式設定 -->
+        <div class="section" id="section2" data-category="operation">
+            <h2>二、運行模式設定</h2>
+
+            <h3>2.1 集選方式<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-27 集選方式</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~3</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：無功能</li>
+                        <li><strong>1</strong>：全集選（所有方向呼車都響應）</li>
+                        <li><strong>2</strong>：上集選（只響應上行呼車）</li>
+                        <li><strong>3</strong>：下集選（只響應下行呼車）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>2.2 內外召控制<span class="index-mark">[[245]](#__245)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 02-07 內外召禁能</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~5</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：正常運行</li>
+                        <li><strong>1</strong>：外召禁能（只響應內召）</li>
+                        <li><strong>2</strong>：外召禁能，內召無法再有新的叫車登錄，參數 02-00 內召測試有效</li>
+                        <li><strong>3</strong>：內外召皆禁能</li>
+                        <li><strong>4</strong>：內、外召全部禁能，且開門禁能</li>
+                        <li><strong>5</strong>：外召禁能，內召無法再有新的叫車登錄，且開門禁能</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>2.3 誤按消除功能<span class="index-mark">[[248]](#__248)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-28 誤按消除功能</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：無誤按取消功能</li>
+                        <li><strong>1</strong>：有內召誤按消除（再按一次取消）</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 三、特殊運行模式 -->
+        <div class="section" id="section3" data-category="special">
+            <h2>三、特殊運行模式</h2>
+
+            <h3>3.1 空閒返基站<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-05 空閒基站</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：1~64S</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 說明：設定電梯空閒時自動返回的樓層</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-06 空閒返基站時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535 秒</div>
+                    <div>• 出廠值：0（關閉功能）</div>
+                    <div>• 說明：電梯空閒超過此時間後自動返回基站</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-07 空閒轎廂照明關閉</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535 秒</div>
+                    <div>• 出廠值：600 秒</div>
+                    <div>• 說明：空閒時自動關閉轎廂照明的延遲時間</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-08 空閒轎廂風扇關閉</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535 秒</div>
+                    <div>• 出廠值：30 秒</div>
+                    <div>• 說明：空閒時自動關閉轎廂風扇的延遲時間</div>
+                </div>
+            </div>
+
+            <h3>3.2 重上電定位<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-17 重上電定位</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~3</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：關閉功能</li>
+                        <li><strong>1</strong>：重上電後行駛至底樓定位</li>
+                        <li><strong>2</strong>：重上電後行駛至頂樓定位</li>
+                        <li><strong>3</strong>：依電梯目前位置自動決定向下或向上定位</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>3.3 VIP 模式<span class="index-mark">[[248]](#__248)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-32 VIP 待命時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535 秒</div>
+                    <div>• 出廠值：4 秒</div>
+                    <div>• 說明：VIP 模式啟動後的待命時間</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-33 VIP 層</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：無功能</li>
+                        <li><strong>1~64</strong>：指定該設定值為前門的 VIP 層</li>
+                        <li><strong>101~164</strong>：指定該設定值減 100 為後門的 VIP 層</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-34 VIP 內召限制</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 說明：VIP 模式時是否限制內召叫車</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 四、安全功能設定 -->
+        <div class="section" id="section4" data-category="safety">
+            <h2>四、安全功能設定</h2>
+
+            <h3>4.1 消防召回功能<span class="index-mark">[[249]](#__249)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-49 主消防基站</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164S</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：取消主消防功能</li>
+                        <li><strong>1~64</strong>：前門消防基站</li>
+                        <li><strong>101~164</strong>：後門消防基站</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-50 第二消防基站</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164S</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：取消第二消防功能</li>
+                        <li><strong>1~64</strong>：前門消防基站</li>
+                        <li><strong>101~164</strong>：後門消防基站</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 05-20 消防召回關門<span class="index-mark">[[253]](#__253)</span></strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：電梯回到消防基站時保持開門</li>
+                        <li><strong>1</strong>：電梯回到消防基站時，先開門 20 秒後自動關門</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 05-23 消防運轉自動開門<span class="index-mark">[[253]](#__253)</span></strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：到達目的樓層時，不會自動開門，必須持續按開門鈕</li>
+                        <li><strong>1</strong>：到達目的樓層時，自動開門</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>4.2 鎖梯功能<span class="index-mark">[[249]](#__249)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-48 鎖梯基站</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164S</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：取消鎖梯功能</li>
+                        <li><strong>1~64</strong>：前門鎖梯基站</li>
+                        <li><strong>101~164</strong>：後門鎖梯基站</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 05-19 鎖梯基站關門<span class="index-mark">[[253]](#__253)</span></strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：電梯回到鎖梯基站時保持開門</li>
+                        <li><strong>1</strong>：電梯回到鎖梯基站時，先開門 20 秒後自動關門</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>4.3 水災功能<span class="index-mark">[[250]](#__250)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-52 水災基站</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：2~164S</div>
+                    <div>• 出廠值：2</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>2~64</strong>：前門水災基站</li>
+                        <li><strong>102~164</strong>：後門水災基站</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>4.4 地震功能<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-15 地震高可自動救出</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：關閉功能</li>
+                        <li><strong>1</strong>：當「地震高」發生時，可執行自動救出運轉</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-19 地震 S 波減速時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~6553.5 秒</div>
+                    <div>• 出廠值：7.0 秒</div>
+                    <div>• 說明：地震 S 波發生時的減速時間</div>
+                </div>
+            </div>
+
+            <h3>4.5 保安層功能<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-29 保安層基站</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164S</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：無功能</li>
+                        <li><strong>1~64</strong>：前門保安層</li>
+                        <li><strong>101~164</strong>：後門保安層</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-30 保安層開始時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~2359</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 說明：保安層模式開始時間（24 小時制）</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-31 保安層結束時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~2359</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 說明：保安層模式結束時間（24 小時制）</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 五、群控功能設定 -->
+        <div class="section" id="section5" data-category="group">
+            <h2>五、群控功能設定</h2>
+
+            <h3>5.1 基本群控設定<span class="index-mark">[[224]](#__224)[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-03 群控站號</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~7</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 說明：設定該電梯在群控系統中的站號（不可重複）</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-04 群控致能</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：單台運轉</li>
+                        <li><strong>1</strong>：群控運轉</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>📌 脫離群控方法<span class="index-mark">[[224]](#__224)</span>：</strong>
+                <ol>
+                    <li>將參數 03-04 設定為 0</li>
+                    <li>拔除該台電梯的 CAR 通訊線</li>
+                    <li>令輸入接點功能碼 161 ISS（獨立運行開關）端子為 ON</li>
+                </ol>
+            </div>
+
+            <h3>5.2 群控主站設定<span class="index-mark">[[250]](#__250)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-68~03-74 群控第 1~7 主站</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~163S</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 說明：設定各樓層的群控主站電梯</div>
+                </div>
+            </div>
+
+            <h3>5.3 群控運行參數<span class="index-mark">[[250]](#__250)[[251]](#__251)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-75 分散運轉等待時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535 秒</div>
+                    <div>• 出廠值：0</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-91 群控反向加樓層</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~60S</div>
+                    <div>• 出廠值：4</div>
+                    <div>• 說明：群控反向運行時增加的樓層數</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-92 群控停一次的時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~60.0 秒</div>
+                    <div>• 出廠值：14.0 秒</div>
+                    <div>• 說明：群控計算每停一次所需的時間</div>
+                </div>
+            </div>
+
+            <h3>5.4 高峰運轉設定<span class="index-mark">[[250]](#__250)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>設定範圍</th>
+                    <th>出廠值</th>
+                </tr>
+                <tr>
+                    <td>03-76</td>
+                    <td>上行高峰 1 開始</td>
+                    <td>0~2359</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-77</td>
+                    <td>上行高峰 1 結束</td>
+                    <td>0~2359</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-78</td>
+                    <td>下行高峰 1 開始</td>
+                    <td>0~2359</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-79</td>
+                    <td>下行高峰 1 結束</td>
+                    <td>0~2359</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-80</td>
+                    <td>上行高峰 2 開始</td>
+                    <td>0~2359</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-81</td>
+                    <td>上行高峰 2 結束</td>
+                    <td>0~2359</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-82</td>
+                    <td>下行高峰 2 開始</td>
+                    <td>0~2359</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-83</td>
+                    <td>下行高峰 2 結束</td>
+                    <td>0~2359</td>
+                    <td>0</td>
+                </tr>
+            </table>
+
+            <h4>高峰運轉條件</h4>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>設定範圍</th>
+                    <th>出廠值</th>
+                </tr>
+                <tr>
+                    <td>03-84</td>
+                    <td>上行高峰滿載次數</td>
+                    <td>0~65535</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-85</td>
+                    <td>下行高峰滿載次數</td>
+                    <td>0~65535</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-86</td>
+                    <td>下行高峰呼車數</td>
+                    <td>0~65535</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-87</td>
+                    <td>上下高峰自保時間</td>
+                    <td>0~65535 秒</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-88</td>
+                    <td>任意樓自保時間</td>
+                    <td>0~65535 秒</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>03-89</td>
+                    <td>任意樓滿載次數</td>
+                    <td>0~65535</td>
+                    <td>0</td>
+                </tr>
+            </table>
+
+            <div class="param-box">
+                <strong>參數 03-90 下行高峰自動向下<span class="index-mark">[[250]](#__250)</span></strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：下行高峰運轉時，電梯召回到靠近頂樓待命時，不會自動往下運轉</li>
+                        <li><strong>1</strong>：下行高峰運轉時，電梯召回到靠近頂樓待命時，會自動往下運轉</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 六、門控功能設定 -->
+        <div class="section" id="section6" data-category="door">
+            <h2>六、門控功能設定</h2>
+
+            <h3>6.1 門系統基本設定<span class="index-mark">[[253]](#__253)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 05-00 門機數量</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：1~2</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>1</strong>：單門系統</li>
+                        <li><strong>2</strong>：雙門系統</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 05-01 開門控制</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~2</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：不開門</li>
+                        <li><strong>1</strong>：先開前門再開後門</li>
+                        <li><strong>2</strong>：同時開啟前後門</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>6.2 開關門時間設定<span class="index-mark">[[253]](#__253)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>設定範圍</th>
+                    <th>出廠值</th>
+                    <th>說明</th>
+                </tr>
+                <tr>
+                    <td>05-10</td>
+                    <td>外召開門時間</td>
+                    <td>0.0~6553.5 秒</td>
+                    <td>5.0 秒</td>
+                    <td>外召呼車時的開門保持時間</td>
+                </tr>
+                <tr>
+                    <td>05-11</td>
+                    <td>內召開門時間</td>
+                    <td>0.0~6553.5 秒</td>
+                    <td>5.0 秒</td>
+                    <td>內召呼車時的開門保持時間</td>
+                </tr>
+                <tr>
+                    <td>05-12</td>
+                    <td>開門延時時間</td>
+                    <td>0.0~6553.5 秒</td>
+                    <td>30.0 秒</td>
+                    <td>按開門延長按鈕時的延長時間</td>
+                </tr>
+                <tr>
+                    <td>05-13</td>
+                    <td>身障開門時間</td>
+                    <td>0.0~6553.5 秒</td>
+                    <td>9.0 秒</td>
+                    <td>身障呼車時的開門保持時間</td>
+                </tr>
+                <tr>
+                    <td>05-21</td>
+                    <td>關門中再開門時間</td>
+                    <td>0.0~6553.5 秒</td>
+                    <td>5.0 秒</td>
+                    <td>關門過程中觸發開門時的開門時間</td>
+                </tr>
+            </table>
+
+            <h3>6.3 開關門保護<span class="index-mark">[[253]](#__253)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 05-14 開門時間保護</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~100 秒</div>
+                    <div>• 出廠值：10 秒</div>
+                    <div>• 說明：開門動作超過此時間視為異常</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 05-15 關門時間保護</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~100 秒</div>
+                    <div>• 出廠值：10 秒</div>
+                    <div>• 說明：關門動作超過此時間視為異常</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 05-16 關門保護次數</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~100</div>
+                    <div>• 出廠值：5 次</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：關門保護次數無限制</li>
+                        <li><strong>1~100</strong>：一小時內關門時間保護次數大於設定值，門會保持開門狀態不會再自動關門，關門按鈕快速閃爍</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>6.4 關門預報功能<span class="index-mark">[[253]](#__253)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 05-17 開延長關門預報</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~100.0 秒</div>
+                    <div>• 出廠值：5.0 秒</div>
+                    <div>• 說明：開門延長結束前的關門預報時間</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 05-18 關門預報時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~199.9 秒</div>
+                    <div>• 出廠值：2.0 秒</div>
+                    <div>• 說明：關門前的預報警示時間</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 七、速度與運行控制 -->
+        <div class="section" id="section7" data-category="speed">
+            <h2>七、速度與運行控制</h2>
+
+            <h3>7.1 多段速度設定<span class="index-mark">[[252]](#__252)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>設定範圍</th>
+                    <th>出廠值</th>
+                    <th>說明</th>
+                </tr>
+                <tr>
+                    <td>04-00</td>
+                    <td>緊急速度</td>
+                    <td>0.00~0.30 m/s</td>
+                    <td>0.15 m/s</td>
+                    <td>緊急情況下的運行速度</td>
+                </tr>
+                <tr>
+                    <td>04-01</td>
+                    <td>檢修速度</td>
+                    <td>0.00~0.63 m/s</td>
+                    <td>0.25 m/s</td>
+                    <td>檢修模式下的運行速度</td>
+                </tr>
+                <tr>
+                    <td>04-02</td>
+                    <td>返端站速度</td>
+                    <td>0.00~1.50 m/s</td>
+                    <td>0.50 m/s</td>
+                    <td>返回端站時的運行速度</td>
+                </tr>
+                <tr>
+                    <td>04-03</td>
+                    <td>井道學習速度</td>
+                    <td>0.00~0.50 m/s</td>
+                    <td>0.20 m/s</td>
+                    <td>執行井道自學習時的運行速度（建議 0.25 m/s）</td>
+                </tr>
+                <tr>
+                    <td>04-04</td>
+                    <td>平層外速度</td>
+                    <td>0.01~0.30 m/s</td>
+                    <td>0.12 m/s</td>
+                    <td>平層區域外的慢速運行速度</td>
+                </tr>
+                <tr>
+                    <td>04-05</td>
+                    <td>平層內速度</td>
+                    <td>0.01~0.15 m/s</td>
+                    <td>0.04 m/s</td>
+                    <td>平層區域內的精確定位速度</td>
+                </tr>
+            </table>
+
+            <h3>7.2 加減速參數<span class="index-mark">[[252]](#__252)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>設定範圍</th>
+                    <th>出廠值</th>
+                </tr>
+                <tr>
+                    <td>04-07</td>
+                    <td>加速度</td>
+                    <td>0.10~1.50 m/s²</td>
+                    <td>0.40 m/s²</td>
+                </tr>
+                <tr>
+                    <td>04-08</td>
+                    <td>減速度</td>
+                    <td>0.10~1.50 m/s²</td>
+                    <td>1.50 m/s²</td>
+                </tr>
+                <tr>
+                    <td>04-09</td>
+                    <td>檢修減速度</td>
+                    <td>0.500~3.000 m/s²</td>
+                    <td>2.000 m/s²</td>
+                </tr>
+                <tr>
+                    <td>04-10</td>
+                    <td>檢修加速度</td>
+                    <td>0.10~1.50 m/s²</td>
+                    <td>0.20 m/s²</td>
+                </tr>
+                <tr>
+                    <td>04-11</td>
+                    <td>再平層減速度</td>
+                    <td>0.10~1.50 m/s²</td>
+                    <td>1.50 m/s²</td>
+                </tr>
+            </table>
+
+            <h3>7.3 S 曲線參數<span class="index-mark">[[252]](#__252)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>設定範圍</th>
+                    <th>出廠值</th>
+                </tr>
+                <tr>
+                    <td>04-14</td>
+                    <td>S1 加速起始時間</td>
+                    <td>0.01~25.00 秒</td>
+                    <td>3.00 秒</td>
+                </tr>
+                <tr>
+                    <td>04-15</td>
+                    <td>S2 加速到達時間</td>
+                    <td>0.01~25.00 秒</td>
+                    <td>1.00 秒</td>
+                </tr>
+                <tr>
+                    <td>04-16</td>
+                    <td>S3 減速起始時間</td>
+                    <td>0.01~25.00 秒</td>
+                    <td>1.00 秒</td>
+                </tr>
+                <tr>
+                    <td>04-17</td>
+                    <td>S4 減速到達時間</td>
+                    <td>0.01~25.00 秒</td>
+                    <td>3.00 秒</td>
+                </tr>
+            </table>
+
+            <div class="note">
+                <strong>📌 調整建議<span class="index-mark">[[232]](#__232)</span>：</strong><br>
+                直接停靠停車位置過頭時：
+                <ul>
+                    <li>調小參數 04-08（減速度）</li>
+                    <li>調大參數 04-17（S4 減速到達時間）</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 八、保護功能設定 -->
+        <div class="section" id="section8" data-category="protection">
+            <h2>八、保護功能設定</h2>
+
+            <h3>8.1 位置保護<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-16 位置誤差保護</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~1000.0 mm</div>
+                    <div>• 出廠值：300.0 mm</div>
+                    <div>• 說明：允許的最大位置誤差，超過此值將產生故障</div>
+                </div>
+            </div>
+
+            <h3>8.2 時間保護<span class="index-mark">[[247]](#__247)[[248]](#__248)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-24 持續運轉保護時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：1~600 秒</div>
+                    <div>• 出廠值：120 秒</div>
+                    <div>• 說明：連續運轉超過此時間將產生故障 F141<span class="index-mark">[[220]](#__220)</span></div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-25 單層運行保護時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：1~45 秒</div>
+                    <div>• 出廠值：20 秒</div>
+                    <div>• 說明：單層運行超過此時間將產生故障 F143</div>
+                </div>
+            </div>
+
+            <h3>8.3 強迫減速過速保護<span class="index-mark">[[248]](#__248)[[249]](#__249)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>設定範圍</th>
+                    <th>出廠值</th>
+                    <th>說明</th>
+                </tr>
+                <tr>
+                    <td>03-37</td>
+                    <td>ULS1 過速度保護</td>
+                    <td>0~100%</td>
+                    <td>50%</td>
+                    <td>上一級強迫減速時的速度限制（0 表示不保護）</td>
+                </tr>
+                <tr>
+                    <td>03-38</td>
+                    <td>DLS1 過速度保護</td>
+                    <td>0~100%</td>
+                    <td>50%</td>
+                    <td>下一級強迫減速時的速度限制</td>
+                </tr>
+                <tr>
+                    <td>03-39</td>
+                    <td>ULS2 過速度保護</td>
+                    <td>0~100%</td>
+                    <td>50%</td>
+                    <td>上二級強迫減速時的速度限制</td>
+                </tr>
+                <tr>
+                    <td>03-40</td>
+                    <td>DLS2 過速度保護</td>
+                    <td>0~100%</td>
+                    <td>50%</td>
+                    <td>下二級強迫減速時的速度限制</td>
+                </tr>
+                <tr>
+                    <td>03-41</td>
+                    <td>ULS3 過速度保護</td>
+                    <td>0~100%</td>
+                    <td>50%</td>
+                    <td>上三級強迫減速時的速度限制</td>
+                </tr>
+                <tr>
+                    <td>03-42</td>
+                    <td>DLS3 過速度保護</td>
+                    <td>0~100%</td>
+                    <td>50%</td>
+                    <td>下三級強迫減速時的速度限制</td>
+                </tr>
+                <tr>
+                    <td>03-43</td>
+                    <td>ULS4 過速度保護</td>
+                    <td>0~100%</td>
+                    <td>50%</td>
+                    <td>上四級強迫減速時的速度限制</td>
+                </tr>
+                <tr>
+                    <td>03-44</td>
+                    <td>DLS4 過速度保護</td>
+                    <td>0~100%</td>
+                    <td>50%</td>
+                    <td>下四級強迫減速時的速度限制</td>
+                </tr>
+            </table>
+
+            <h3>8.4 檢修極限保護<span class="index-mark">[[245]](#__245)[[246]](#__246)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 02-44 檢修上行極限距離</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~2500.0 mm</div>
+                    <div>• 出廠值：0.0 mm</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：關閉該功能，檢修上行可運行到 MI 33 LSU（上限位開關）動作為止</li>
+                        <li><strong>0.1~2500.0</strong>：在控盤檢修或轎頂檢修模式時，手動上行只可運行到頂樓水平位置減此設定值的地方</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 02-45 檢修下行極限距離</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~2500.0 mm</div>
+                    <div>• 出廠值：0.0 mm</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：關閉該功能，檢修下行可運行到 MI 34 LSD（下限位開關）動作為止</li>
+                        <li><strong>0.1~2500.0</strong>：在控盤檢修或底坑檢修模式時，手動下行只可運行到底樓水平位置加此設定值的地方</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>8.5 故障自動復歸<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-23 故障復歸次數</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~10 次</div>
+                    <div>• 出廠值：1 次</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：關閉復歸功能</li>
+                        <li><strong>1~10</strong>：一小時內相同故障發生的次數沒有超過設定值，故障會自動復歸</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 九、煞車制動力測試 -->
+        <div class="section" id="section9" data-category="brake">
+            <h2>九、煞車制動力測試</h2>
+
+            <h3>9.1 制動力測試參數<span class="index-mark">[[250]](#__250)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-60 持續時間煞車測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~20.0 秒</div>
+                    <div>• 出廠值：5.0 秒</div>
+                    <div>• 說明：制動力測試的持續時間</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-61 輸出力矩煞車測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~200%</div>
+                    <div>• 出廠值：100%</div>
+                    <div>• 說明：制動力測試時的輸出力矩百分比</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-62 移動距離煞車測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.0~50.0 mm</div>
+                    <div>• 出廠值：5.0 mm</div>
+                    <div>• 說明：制動力測試允許的最大移動距離</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-63 向上-煞車測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：執行煞車制動力測試時，向下運轉</li>
+                        <li><strong>1</strong>：執行煞車制動力測試時，向上運轉</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>9.2 定時自動測試<span class="index-mark">[[250]](#__250)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-64 幾點-煞車測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~23</div>
+                    <div>• 出廠值：2</div>
+                    <div>• 說明：每天自動執行煞車測試的小時（24 小時制）</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-65 幾分-煞車測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~59</div>
+                    <div>• 出廠值：59</div>
+                    <div>• 說明：每天自動執行煞車測試的分鐘</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-66 幾層-煞車測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~64</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 說明：執行煞車測試的指定樓層，0 表示在任何樓層</div>
+                </div>
+            </div>
+
+            <h3>9.3 手動啟動測試<span class="index-mark">[[226]](#__226)[[250]](#__250)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-67 開始-煞車測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 操作說明：</div>
+                    <ol>
+                        <li>先使電梯停在平層位置，並且電梯必須處於手動模式</li>
+                        <li>確保沒有任何故障發生</li>
+                        <li>設定參數 03-67 = 1，會開始制動力測試</li>
+                        <li>制動力測試完成後，參數 03-67 將自動返回到 0</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ 重要提醒：</strong>電梯第一次自動運行前一定要完成制動力測試，否則將出現故障代碼 F150（制動力檢測不合格）<span class="index-mark">[[226]](#__226)</span>
+            </div>
+        </div>
+
+        <!-- 十、其他功能設定 -->
+        <div class="section" id="section10" data-category="other">
+            <h2>十、其他功能設定</h2>
+
+            <h3>10.1 平層與門區控制<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-18 平層開關延遲時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0.000~2.000 秒</div>
+                    <div>• 出廠值：0.200 秒</div>
+                    <div>• 說明：平層開關動作的延遲時間</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-56 SX1 延時</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~30 ms</div>
+                    <div>• 出廠值：0 ms</div>
+                    <div>• 說明：門區信號 SX1 的延遲時間</div>
+                </div>
+            </div>
+
+            <h3>10.2 脈衝與方向控制<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-22 脈衝邏輯反向</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：與設定方向相同</li>
+                        <li><strong>1</strong>：與設定方向相反</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 03-99 轎內箭頭同運行</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~1</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：轎廂內的運轉方向指示同乘場的運轉方向指示</li>
+                        <li><strong>1</strong>：電梯停止中，轎廂內方向指示同乘場；電梯運轉中，轎廂內方向指示同馬達運轉方向</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>10.3 緊急電源 (UPS)<span class="index-mark">[[247]](#__247)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-09 UPS 指定到達樓層</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：UPS 供電時電梯停在最近樓層</li>
+                        <li><strong>1~64</strong>：UPS 供電時電梯前門停靠到指定樓層</li>
+                        <li><strong>101~164</strong>：UPS 供電時電梯後門停靠到指定樓層（設定值減 100）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>10.4 內召密碼功能<span class="index-mark">[[249]](#__249)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-45 內召叫車密碼</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 說明：設定內召叫車的密碼，0 表示無密碼保護</div>
+                </div>
+            </div>
+
+            <h3>10.5 轎內指令板功能<span class="index-mark">[[221]](#__221)[[249]](#__249)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 03-51 ICB(轎內指令板)功能設定</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~4</div>
+                    <div>• 出廠值：0</div>
+                </div>
+            </div>
+
+            <table>
+                <tr>
+                    <th>設定值</th>
+                    <th>功能說明</th>
+                    <th>轎內指令板安裝順序</th>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>單門模式</td>
+                    <td>前門 1~64F</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>單門身障模式</td>
+                    <td>前門 1~16F / 前門 17~32F / 前障 1~16F / 前障 17~32F</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>前後門模式</td>
+                    <td>前門 1~16F / 前門 17~32F / 後門 1~16F / 後門 17~32F</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>前後門身障模式</td>
+                    <td>前門 1~16F / 前障 1~16F / 後門 1~16F / 後障 1~16F</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>有前後門非貫通模式</td>
+                    <td>1~16F / 17~32F / 1~16F / 17~32F</td>
+                </tr>
+            </table>
+
+            <div class="note">
+                <strong>📌 注意：</strong>該參數同時會致能或禁能相對應的外召呼車<span class="index-mark">[[221]](#__221)</span>
+            </div>
+        </div>
+
+        <!-- 十一、系統測試功能 -->
+        <div class="section" id="section11" data-category="test">
+            <h2>十一、系統測試功能</h2>
+
+            <h3>11.1 內外召測試<span class="index-mark">[[227]](#__227)[[245]](#__245)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 02-00 內召測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 說明：利用數位操作器當作轎內指令板執行呼車</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 02-01 外召上測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 說明：利用數位操作器當作外召顯示板執行上行呼車</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 02-02 外召下測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~164</div>
+                    <div>• 出廠值：1</div>
+                    <div>• 說明：利用數位操作器當作外召顯示板執行下行呼車</div>
+                </div>
+            </div>
+
+            <h3>11.2 自動測試功能<span class="index-mark">[[245]](#__245)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 02-03 自動測試方法</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~3</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：不測試</li>
+                        <li><strong>1</strong>：頂底樓測試</li>
+                        <li><strong>2</strong>：每樓停測試</li>
+                        <li><strong>3</strong>：亂數叫車</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 02-04 自動測試次數</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535</div>
+                    <div>• 出廠值：65535</div>
+                    <div>• 說明：65535 表示持續隨機測試</div>
+                </div>
+            </div>
+
+            <div class="param-box">
+                <strong>參數 02-05 自動測試間隔時間</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~3600 秒</div>
+                    <div>• 出廠值：300 秒</div>
+                    <div>• 說明：自動測試之間的間隔時間</div>
+                </div>
+            </div>
+
+            <h3>11.3 強制開關門測試<span class="index-mark">[[221]](#__221)[[245]](#__245)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 02-06 強制開關門測試</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~4</div>
+                    <div>• 出廠值：0</div>
+                    <div>• 選項說明：</div>
+                    <ul>
+                        <li><strong>0</strong>：正常模式</li>
+                        <li><strong>1</strong>：強制開前門</li>
+                        <li><strong>2</strong>：強制開後門</li>
+                        <li><strong>3</strong>：強制前後門打開</li>
+                        <li><strong>4</strong>：強制前後門關閉</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>📌 注意：</strong>檢修模式下才有作用，在平層或非平層都可強制開門<span class="index-mark">[[221]](#__221)</span>
+            </div>
+        </div>
+
+        <!-- 十二、系統維護功能 -->
+        <div class="section" id="section12" data-category="maintenance">
+            <h2>十二、系統維護功能</h2>
+
+            <h3>12.1 時鐘設定<span class="index-mark">[[246]](#__246)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>設定範圍</th>
+                    <th>出廠值</th>
+                </tr>
+                <tr>
+                    <td>02-25</td>
+                    <td>時鐘-年</td>
+                    <td>0~2099</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>02-26</td>
+                    <td>時鐘-月</td>
+                    <td>0~12</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>02-27</td>
+                    <td>時鐘-日</td>
+                    <td>0~31</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>02-28</td>
+                    <td>時鐘-小時</td>
+                    <td>0~24</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>02-29</td>
+                    <td>時鐘-分</td>
+                    <td>0~59</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>02-30</td>
+                    <td>時鐘-秒</td>
+                    <td>0~59</td>
+                    <td>0</td>
+                </tr>
+            </table>
+
+            <div class="param-box">
+                <strong>參數 02-41 每日時鐘誤差值</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：-16.62~16.62 秒</div>
+                    <div>• 出廠值：0.00 秒</div>
+                    <div>• 說明：用於補償時鐘的每日誤差</div>
+                </div>
+            </div>
+
+            <h3>12.2 參數重置<span class="index-mark">[[245]](#__245)</span></h3>
+
+            <div class="param-box">
+                <strong>參數 02-08 參數重置</strong>
+                <div class="param-detail">
+                    <div>• 設定範圍：0~65535</div>
+                    <div>• 出廠值：101</div>
+                </div>
+            </div>
+
+            <table>
+                <tr>
+                    <th>設定值</th>
+                    <th>說明</th>
+                </tr>
+                <tr>
+                    <td>101</td>
+                    <td>單門 + 一般 + 一級強迫減速，所有參數回復出廠設定值</td>
+                </tr>
+                <tr>
+                    <td>102</td>
+                    <td>單門 + 一般 + 二級強迫減速</td>
+                </tr>
+                <tr>
+                    <td>103</td>
+                    <td>單門 + 一般 + 一級強迫減速，不回復出廠設定值</td>
+                </tr>
+                <tr>
+                    <td>111</td>
+                    <td>單門 + 身障 + 一級強迫減速</td>
+                </tr>
+                <tr>
+                    <td>112</td>
+                    <td>單門 + 身障 + 二級強迫減速</td>
+                </tr>
+                <tr>
+                    <td>201</td>
+                    <td>雙門 + 一般 + 一級強迫減速</td>
+                </tr>
+                <tr>
+                    <td>202</td>
+                    <td>雙門 + 一般 + 二級強迫減速</td>
+                </tr>
+                <tr>
+                    <td>211</td>
+                    <td>雙門 + 身障 + 一級強迫減速</td>
+                </tr>
+                <tr>
+                    <td>212</td>
+                    <td>雙門 + 身障 + 二級強迫減速</td>
+                </tr>
+                <tr>
+                    <td>300</td>
+                    <td>特殊定義單機 1</td>
+                </tr>
+                <tr>
+                    <td>301</td>
+                    <td>特殊定義控制櫃 1</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 十三、監控與診斷 -->
+        <div class="section" id="section13" data-category="monitor">
+            <h2>十三、監控與診斷</h2>
+
+            <h3>13.1 系統狀態監控（參數 00 群）<span class="index-mark">[[234]](#__234)[[235]](#__235)[[236]](#__236)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>說明</th>
+                </tr>
+                <tr>
+                    <td>00-00</td>
+                    <td>最新異常碼</td>
+                    <td>顯示最新發生的異常代碼（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-01</td>
+                    <td>速度指令</td>
+                    <td>5=緊急停止 / 10=檢修停止 / 30=檢修速度 / 40=平層內速度 / 45=平層外速度 / 60=返端站速度 / 65=直接停靠速度 / 80=無速度命令（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-07</td>
+                    <td>電梯速度偵測</td>
+                    <td>顯示當前電梯速度 0.000~65.535 m/s（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-17</td>
+                    <td>目前層</td>
+                    <td>顯示電梯當前所在樓層（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-18</td>
+                    <td>目標層</td>
+                    <td>顯示電梯目標樓層（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-19</td>
+                    <td>最遠層</td>
+                    <td>顯示最遠呼車樓層（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-20/00-21</td>
+                    <td>目前位置</td>
+                    <td>顯示電梯當前位置（高位：m，低位：mm）（唯讀）</td>
+                </tr>
+            </table>
+
+            <h3>13.2 運行統計（參數 00 群）<span class="index-mark">[[237]](#__237)</span></h3>
+
+            <table>
+                <tr>
+                    <th>參數</th>
+                    <th>名稱</th>
+                    <th>說明</th>
+                </tr>
+                <tr>
+                    <td>00-22</td>
+                    <td>運行次數(萬)</td>
+                    <td>累計運行次數的萬位數（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-23</td>
+                    <td>運行次數(次)</td>
+                    <td>累計運行次數的個位數（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-24</td>
+                    <td>累計運行的時間(時)</td>
+                    <td>累計運行時間的小時數（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-25</td>
+                    <td>累計運行的時間(秒)</td>
+                    <td>累計運行時間的秒數（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-36</td>
+                    <td>累計送電時間(天)</td>
+                    <td>累計送電天數（唯讀）</td>
+                </tr>
+                <tr>
+                    <td>00-37</td>
+                    <td>累計送電時間(分)</td>
+                    <td>累計送電分鐘數（唯讀）</td>
+                </tr>
+            </table>
+
+            <h3>13.3 井道學習狀態（參數 00-63）<span class="index-mark">[[241]](#__241)[[242]](#__242)</span></h3>
+
+            <div class="note">
+                <strong>📌 井道自學習狀態代碼：</strong>
+                <ul>
+                    <li><strong>0~3</strong>：準備階段</li>
+                    <li><strong>10~25</strong>：下行學習階段</li>
+                    <li><strong>26~39</strong>：上行學習階段</li>
+                    <li><strong>200~210</strong>：異常狀態</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 十四、快速設定指南 -->
+        <div class="section" id="section14" data-category="guide">
+            <h2>十四、快速設定指南</h2>
+
+            <h3>14.1 新電梯初次設定流程</h3>
+
+            <div class="note">
+                <strong>🚀 步驟 1：基本樓層設定</strong>
+                <ul>
+                    <li>參數 03-01：物理最高層</li>
+                    <li>參數 03-02：物理最低層</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>🚀 步驟 2：門系統設定</strong>
+                <ul>
+                    <li>參數 05-00：門機數量（1=單門，2=雙門）</li>
+                    <li>參數 05-01：開門控制（1=先開前門，2=同時開）</li>
+                    <li>參數 03-51：ICB 功能設定</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>🚀 步驟 3：速度設定</strong>
+                <ul>
+                    <li>參數 04-01：檢修速度（建議 0.25 m/s）</li>
+                    <li>參數 04-03：井道學習速度（建議 0.25 m/s）</li>
+                    <li>參數 04-07：加速度</li>
+                    <li>參數 04-08：減速度</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>🚀 步驟 4：安全基站設定</strong>
+                <ul>
+                    <li>參數 03-05：空閒基站</li>
+                    <li>參數 03-48：鎖梯基站</li>
+                    <li>參數 03-49：主消防基站</li>
+                    <li>參數 03-52：水災基站</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ 步驟 5：執行井道自學習</strong>
+                <ul>
+                    <li>參數 03-00 = 1</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ 步驟 6：執行制動力測試</strong>
+                <ul>
+                    <li>參數 03-67 = 1</li>
+                </ul>
+            </div>
+
+            <h3>14.2 群控系統設定流程</h3>
+
+            <div class="note">
+                <strong>🔗 步驟 1：各台電梯設定站號</strong>
+                <ul>
+                    <li>參數 03-03：群控站號（0~7，不可重複）</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>🔗 步驟 2：統一物理樓層</strong>
+                <ul>
+                    <li>所有電梯的參數 03-01、03-02 設定相同</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>🔗 步驟 3：啟用群控</strong>
+                <ul>
+                    <li>參數 03-04 = 1</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>🔗 步驟 4：設定群控主站（選配）</strong>
+                <ul>
+                    <li>參數 03-68~03-74：各樓層的群控主站</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>🔗 步驟 5：設定高峰運轉（選配）</strong>
+                <ul>
+                    <li>參數 03-76~03-83：高峰時段</li>
+                    <li>參數 03-84~03-89：高峰條件</li>
+                </ul>
+            </div>
+
+            <h3>14.3 常用功能快速設定</h3>
+
+            <h4>📌 延長開門時間</h4>
+            <ul>
+                <li>參數 05-10：外召開門時間（預設 5.0 秒）</li>
+                <li>參數 05-11：內召開門時間（預設 5.0 秒）</li>
+                <li>參數 05-12：開門延時時間（預設 30.0 秒）</li>
+            </ul>
+
+            <h4>📌 調整電梯速度</h4>
+            <ul>
+                <li>如果速度不準確，調整參數 13-03（電梯額定速度頻率）<span class="index-mark">[[232]](#__232)</span></li>
+                <li>直接停靠模式：調整參數 13-20（最大梯速百分比）<span class="index-mark">[[232]](#__232)</span></li>
+            </ul>
+
+            <h4>📌 停車位置調整</h4>
+            <ul>
+                <li>停車過頭：調小參數 04-08（減速度）或調大參數 04-17（S4 減速到達時間）<span class="index-mark">[[232]](#__232)</span></li>
+            </ul>
+
+            <h4>📌 開啟誤按消除</h4>
+            <ul>
+                <li>參數 03-28 = 1</li>
+            </ul>
+
+            <h4>📌 設定空閒返基站</h4>
+            <ul>
+                <li>參數 03-05：空閒基站樓層</li>
+                <li>參數 03-06：空閒返基站時間（秒）</li>
+            </ul>
+
+            <div class="warning">
+                <strong>⚠️ 重要提醒：</strong>
+                <ol>
+                    <li>所有參數設定完成後，建議使用參數複製功能（參數 00 群）備份設定<span class="index-mark">[[176]](#__176)[[177]](#__177)</span></li>
+                    <li>修改 MI/MO 接點設定後，需重新送電才會正常動作<span class="index-mark">[[206]](#__206)</span></li>
+                    <li>群控系統的物理樓層必須所有電梯設定一致<span class="index-mark">[[225]](#__225)[[226]](#__226)</span></li>
+                    <li>第一次自動運行前必須完成制動力測試<span class="index-mark">[[226]](#__226)</span></li>
+                </ol>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 返回頂部按鈕 -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</button>
+
+    <script>
+        // 搜尋功能
+        function searchContent() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sections = document.querySelectorAll('.section');
+            let found = false;
+
+            // 移除之前的高亮
+            document.querySelectorAll('.highlight').forEach(el => {
+                el.outerHTML = el.innerHTML;
+            });
+
+            if (searchTerm === '') {
+                sections.forEach(section => section.style.display = 'block');
+                return;
+            }
+
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    section.style.display = 'block';
+                    found = true;
+                    
+                    // 高亮搜尋詞
+                    highlightText(section, searchTerm);
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            if (!found) {
+                alert('未找到相關內容');
+            } else {
+                // 滾動到第一個結果
+                const firstVisible = Array.from(sections).find(s => s.style.display !== 'none');
+                if (firstVisible) {
+                    firstVisible.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        // 高亮文字
+        function highlightText(element, searchTerm) {
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            const nodesToReplace = [];
+            while (walker.nextNode()) {
+                const node = walker.currentNode;
+                if (node.nodeValue.toLowerCase().includes(searchTerm)) {
+                    nodesToReplace.push(node);
+                }
+            }
+
+            nodesToReplace.forEach(node => {
+                const span = document.createElement('span');
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                span.innerHTML = node.nodeValue.replace(regex, '<span class="highlight">$1</span>');
+                node.parentNode.replaceChild(span, node);
+            });
+        }
+
+        // 類別篩選功能
+        function filterCategory() {
+            const category = document.getElementById('categorySelect').value;
+            const sections = document.querySelectorAll('.section');
+
+            if (category === 'all') {
+                sections.forEach(section => section.style.display = 'block');
+            } else {
+                sections.forEach(section => {
+                    if (section.dataset.category === category) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            }
+
+            // 滾動到第一個可見的章節
+            const firstVisible = Array.from(sections).find(s => s.style.display !== 'none');
+            if (firstVisible) {
+                firstVisible.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 回到頂部功能
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // 重置篩選和搜尋
+            document.getElementById('categorySelect').value = 'all';
+            document.getElementById('searchInput').value = '';
+            filterCategory();
+        }
+
+        // 顯示/隱藏返回頂部按鈕
+        window.addEventListener('scroll', function() {
+            const backToTop = document.getElementById('backToTop');
+            if (window.pageYOffset > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
+        });
+
+        // 搜尋框 Enter 鍵支援
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchContent();
+            }
+        });
+
+        // 列印功能優化
+        window.addEventListener('beforeprint', function() {
+            // 列印前顯示所有內容
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
