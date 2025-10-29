@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IED-S 電梯運行模式總覽</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .mode-section {
+            margin-bottom: 50px;
+        }
+        
+        .section-title {
+            font-size: 2em;
+            color: #1e3c72;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title .icon {
+            font-size: 1.2em;
+            margin-right: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .mode-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            border-left-color: #764ba2;
+        }
+        
+        .mode-card h3 {
+            color: #2a5298;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mode-card h3 .badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            margin-left: 10px;
+        }
+        
+        .mode-card .description {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+        
+        .mode-card .details {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .mode-card .details h4 {
+            color: #667eea;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        
+        .mode-card .details ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .mode-card .details li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #666;
+        }
+        
+        .mode-card .details li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .param-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .index-tag {
+            display: inline-block;
+            background: #fff3e0;
+            color: #f57c00;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+        
+        .priority-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .priority-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .priority-medium {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .priority-normal {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-top: 3px solid #667eea;
+        }
+        
+        .note-box {
+            background: #fff9c4;
+            border-left: 5px solid #fbc02d;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 10px;
+        }
+        
+        .note-box h4 {
+            color: #f57f17;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .mode-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .section-title {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 IED-S 電梯運行模式總覽</h1>
+            <p>台達電梯一體機完整運行模式說明 | Delta Elevator Integrated Drive System</p>
+        </div>
+        
+        <div class="content">
+            
+            <!-- 基本運行模式 -->
+            <div class="mode-section">
+                <h2 class="section-title">
+                    <span class="icon">🔵</span>
+                    基本運行模式
+                </h2>
+                
+                <div class="mode-grid">
+                    <!-- 正常模式 -->
+                    <div class="mode-card">
+                        <h3>正常運轉模式 <span class="badge">Normal</span></h3>
+                        <p class="description">電梯的標準自動運行模式，響應內外召呼車請求<span class="index-tag">[[235]](#__235)</span></p>
+                        <div class="details">
+                            <h4>📋 模式特徵：</h4>
+                            <ul>
+                                <li>參數 00-09 bit 3 = 1 表示正常模式</li>
+                                <li>自動響應內召和外召呼車</li>
+                                <li>執行集選運行邏輯</li>
+                                <li>門控自動開關</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">00-09 bit 3</span>
+                                <span class="param-tag">03-27 集選方式</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 多段速運行 -->
+                    <div class="mode-card">
+                        <h3>多段速運行模式 <span class="badge">Multi-Speed</span></h3>
+                        <p class="description">根據不同運行階段使用不同速度<span class="index-tag">[[234]](#__234)</span></p>
+                        <div class="details">
+                            <h4>📋 速度階段：</h4>
+                            <ul>
+                                <li><strong>檢修速度</strong>：參數 04-01 (0.25 m/s)</li>
+                                <li><strong>平層內速度</strong>：參數 04-05 (0.04 m/s)</li>
+                                <li><strong>平層外速度</strong>：參數 04-04 (0.12 m/s)</li>
+                                <li><strong>返端站速度</strong>：參數 04-02 (0.50 m/s)</li>
+                                <li><strong>井道學習速度</strong>：參數 04-03 (0.20 m/s)</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">04-01~04-05</span>
+                                <span class="param-tag">00-01 速度指令</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 直接停靠 -->
+                    <div class="mode-card">
+                        <h3>直接停靠模式 <span class="badge">Direct Stop</span></h3>
+                        <p class="description">使用 S 曲線加減速直接停靠目標樓層<span class="index-tag">[[230]](#__230)[[231]](#__231)</span></p>
+                        <div class="details">
+                            <h4>📋 速度曲線參數：</h4>
+                            <ul>
+                                <li><strong>加速度</strong>：參數 04-07 (0.40 m/s²)</li>
+                                <li><strong>減速度</strong>：參數 04-08 (1.50 m/s²)</li>
+                                <li><strong>S1 加速起始</strong>：參數 04-14 (3.00 秒)</li>
+                                <li><strong>S2 加速到達</strong>：參數 04-15 (1.00 秒)</li>
+                                <li><strong>S3 減速起始</strong>：參數 04-16 (1.00 秒)</li>
+                                <li><strong>S4 減速到達</strong>：參數 04-17 (3.00 秒)</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">04-07~04-17</span>
+                                <span class="param-tag">13-20 最大梯速%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 再平層 -->
+                    <div class="mode-card">
+                        <h3>再平層模式 <span class="badge">Re-Leveling</span></h3>
+                        <p class="description">開門狀態下修正平層位置<span class="index-tag">[[234]](#__234)</span></p>
+                        <div class="details">
+                            <h4>📋 觸發條件：</h4>
+                            <ul>
+                                <li>參數 03-21 = 1 (可開門再平層)</li>
+                                <li>門已開啟且位置偏離平層</li>
+                                <li>使用參數 04-11 減速度</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-21 開門再平層</span>
+                                <span class="param-tag">04-11 再平層減速度</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 安全運行模式 -->
+            <div class="mode-section">
+                <h2 class="section-title">
+                    <span class="icon">🔴</span>
+                    安全運行模式
+                </h2>
+                
+                <div class="mode-grid">
+                    <!-- 檢修模式 -->
+                    <div class="mode-card">
+                        <h3>檢修運轉模式 <span class="badge">Inspection</span></h3>
+                        <p class="description">維護人員手動控制電梯運行<span class="index-tag">[[222]](#__222)[[223]](#__223)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：高</div>
+                        <div class="details">
+                            <h4>📋 檢修類型：</h4>
+                            <ul>
+                                <li><strong>控盤檢修</strong>：MI = 7 INSCP</li>
+                                <li><strong>轎頂檢修</strong>：MI = 112 TCI</li>
+                                <li><strong>轎廂內檢修</strong>：MI = 153 INSIC</li>
+                                <li><strong>底坑檢修</strong>：MI = 10 MATPT</li>
+                            </ul>
+                            <h4>🎯 優先權順序：</h4>
+                            <ul>
+                                <li>底坑檢修 = 轎頂檢修 &gt; 轎廂內檢修 &gt; 控盤檢修 &gt; 緊急電動</li>
+                            </ul>
+                            <h4>⚙️ 速度控制：</h4>
+                            <ul>
+                                <li>前 3 秒：參數 04-05 平層內速度</li>
+                                <li>3 秒後：參數 04-01 檢修速度</li>
+                                <li>強迫減速時：參數 04-04 平層外速度</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">06-07~06-10</span>
+                                <span class="param-tag">04-01 檢修速度</span>
+                                <span class="param-tag">04-18 慢速時間</span>
+                                <span class="param-tag">02-44 上行極限</span>
+                                <span class="param-tag">02-45 下行極限</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 緊急電動運行 -->
+                    <div class="mode-card">
+                        <h3>緊急電動運行 <span class="badge">Emergency</span></h3>
+                        <p class="description">停電或故障時的應急運行模式<span class="index-tag">[[222]](#__222)[[223]](#__223)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：中高</div>
+                        <div class="details">
+                            <h4>📋 啟動條件：</h4>
+                            <ul>
+                                <li>MI = 11 EIS (緊急電動運行) ON</li>
+                                <li>MI = 12 UDB (上行按鈕) 或 MI = 13 DDB (下行按鈕)</li>
+                            </ul>
+                            <h4>⚙️ 速度控制：</h4>
+                            <ul>
+                                <li>前 3 秒：參數 04-05 平層內速度</li>
+                                <li>3 秒後：參數 04-04 平層外速度</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">06-11~06-13</span>
+                                <span class="param-tag">04-04 平層外速度</span>
+                                <span class="param-tag">04-18 慢速時間</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 強制停止減速 -->
+                    <div class="mode-card">
+                        <h3>強制停止減速 (FSD) <span class="badge">FSD</span></h3>
+                        <p class="description">安全迴路異常時的強制減速停止<span class="index-tag">[[235]](#__235)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：最高</div>
+                        <div class="details">
+                            <h4>📋 觸發條件：</h4>
+                            <ul>
+                                <li>安全迴路斷開 (SFH/SFL/SFNC)</li>
+                                <li>門鎖迴路異常 (GSH/DSH)</li>
+                                <li>限速器動作 (GOV)</li>
+                                <li>上/下限位動作 (LSU/LSD)</li>
+                            </ul>
+                            <h4>⚙️ 減速方式：</h4>
+                            <ul>
+                                <li>使用參數 04-29 檢修減速度 (2.0 m/s²)</li>
+                                <li>強制煞車閉合</li>
+                                <li>速度指令 = 5 或 10</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">00-09 bit 2</span>
+                                <span class="param-tag">04-29 檢修減速度</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 救援模式 -->
+                    <div class="mode-card">
+                        <h3>救援運轉模式 <span class="badge">Rescue</span></h3>
+                        <p class="description">困人時的救援運行<span class="index-tag">[[235]](#__235)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：高</div>
+                        <div class="details">
+                            <h4>📋 救援類型：</h4>
+                            <ul>
+                                <li><strong>UPS 救出</strong>：參數 00-08 bit 9</li>
+                                <li><strong>EPS 救出</strong>：參數 00-08 bit 10</li>
+                                <li><strong>地震高救出</strong>：MI = 64 ERGO</li>
+                            </ul>
+                            <h4>🎯 運行目標：</h4>
+                            <ul>
+                                <li>運行至最近平層開門</li>
+                                <li>或運行至指定樓層 (參數 03-09)</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">00-08 bit 9~10</span>
+                                <span class="param-tag">03-09 UPS 指定樓層</span>
+                                <span class="param-tag">03-15 地震高救出</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 制動力測試 -->
+                    <div class="mode-card">
+                        <h3>制動力檢測模式 <span class="badge">Brake Test</span></h3>
+                        <p class="description">自動檢測煞車制動力是否合格<span class="index-tag">[[226]](#__226)</span></p>
+                        <div class="priority-indicator priority-medium">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 測試類型：</h4>
+                            <ul>
+                                <li><strong>手動測試</strong>：參數 03-67 = 1</li>
+                                <li><strong>自動測試</strong>：每天指定時間 (參數 03-64~03-66)</li>
+                            </ul>
+                            <h4>⚙️ 測試參數：</h4>
+                            <ul>
+                                <li>持續時間：參數 03-60 (5.0 秒)</li>
+                                <li>輸出力矩：參數 03-61 (100%)</li>
+                                <li>移動距離：參數 03-62 (5.0 mm)</li>
+                                <li>測試方向：參數 03-63 (0=下 / 1=上)</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-60~03-67</span>
+                                <span class="param-tag">00-01 = 6 或 8</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 過速保護 -->
+                    <div class="mode-card">
+                        <h3>過速度保護模式 <span class="badge">Overspeed</span></h3>
+                        <p class="description">強迫減速開關處的速度監控<span class="index-tag">[[258]](#__258)[[259]](#__259)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：最高</div>
+                        <div class="details">
+                            <h4>📋 監控點：</h4>
+                            <ul>
+                                <li><strong>ULS1~ULS4</strong>：上強減 1~4 級</li>
+                                <li><strong>DLS1~DLS4</strong>：下強減 1~4 級</li>
+                                <li>預設保護值：額定速度的 50%</li>
+                            </ul>
+                            <h4>⚠️ 故障碼：</h4>
+                            <ul>
+                                <li>F194~F197：ULS1~ULS4 過速度</li>
+                                <li>F198~F201：DLS4~DLS1 過速度</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-37~03-44</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 特殊運行模式 -->
+            <div class="mode-section">
+                <h2 class="section-title">
+                    <span class="icon">🟡</span>
+                    特殊運行模式
+                </h2>
+                
+                <div class="mode-grid">
+                    <!-- 消防運轉 -->
+                    <div class="mode-card">
+                        <h3>消防運轉模式 <span class="badge">Fire Service</span></h3>
+                        <p class="description">火災時的專用運行模式<span class="index-tag">[[235]](#__235)[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：最高</div>
+                        <div class="details">
+                            <h4>📋 消防階段：</h4>
+                            <ul>
+                                <li><strong>一階消防</strong>：參數 00-08 bit 11~12 (返基站)</li>
+                                <li><strong>二階消防</strong>：參數 00-09 bit 8~9 (消防員操作)</li>
+                            </ul>
+                            <h4>🎯 基站設定：</h4>
+                            <ul>
+                                <li>主消防基站：參數 03-49 (MI = 44 FIRM)</li>
+                                <li>次消防基站：參數 03-50 (MI = 45 FIRS)</li>
+                            </ul>
+                            <h4>⚙️ 運行特性：</h4>
+                            <ul>
+                                <li>禁止外召響應</li>
+                                <li>返基站後開門 (參數 05-20 控制)</li>
+                                <li>二階時需持續按開門鈕 (參數 05-23 = 0)</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-49~03-50</span>
+                                <span class="param-tag">05-20 關門控制</span>
+                                <span class="param-tag">05-23 自動開門</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 地震運轉 -->
+                    <div class="mode-card">
+                        <h3>地震運轉模式 <span class="badge">Earthquake</span></h3>
+                        <p class="description">地震感應時的安全運行<span class="index-tag">[[235]](#__235)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：高</div>
+                        <div class="details">
+                            <h4>📋 地震等級：</h4>
+                            <ul>
+                                <li><strong>地震特低 (P 波)</strong>：MI = 51 ERP，參數 00-08 bit 13</li>
+                                <li><strong>地震低 (S 波)</strong>：MI = 52 ERS，參數 00-08 bit 14</li>
+                                <li><strong>地震高</strong>：MI = 53 ERH，參數 00-08 bit 15</li>
+                            </ul>
+                            <h4>⚙️ 運行策略：</h4>
+                            <ul>
+                                <li><strong>P 波/S 波</strong>：減速至最近平層停止</li>
+                                <li><strong>地震高</strong>：立即停止，可選擇自動救出 (參數 03-15)</li>
+                                <li>減速時間：參數 03-19 (7.0 秒)</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-15 地震高救出</span>
+                                <span class="param-tag">03-19 減速時間</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 水災模式 -->
+                    <div class="mode-card">
+                        <h3>水災運轉模式 <span class="badge">Flood</span></h3>
+                        <p class="description">水災時避開淹水樓層<span class="index-tag">[[235]](#__235)</span></p>
+                        <div class="priority-indicator priority-medium">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 水災類型：</h4>
+                            <ul>
+                                <li><strong>不自動復歸</strong>：MI = 48 FLOOD，參數 00-08 bit 7</li>
+                                <li><strong>會自動復歸</strong>：MI = 49 FLOODA，參數 00-08 bit 6</li>
+                            </ul>
+                            <h4>⚙️ 運行限制：</h4>
+                            <ul>
+                                <li>電梯運行至水災基站 (參數 03-52)</li>
+                                <li>不停靠水災基站以下樓層</li>
+                                <li>水災基站預設為 2F</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-52 水災基站</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 鎖梯模式 -->
+                    <div class="mode-card">
+                        <h3>鎖梯模式 <span class="badge">Park</span></h3>
+                        <p class="description">暫停服務並返回指定樓層<span class="index-tag">[[235]](#__235)[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 啟動方式：</h4>
+                            <ul>
+                                <li>MI = 43 PARK (鎖梯開關)</li>
+                                <li>參數 00-09 bit 10 = 1</li>
+                            </ul>
+                            <h4>🎯 鎖梯基站：</h4>
+                            <ul>
+                                <li>參數 03-48 設定 (預設 1F)</li>
+                                <li>0 = 取消鎖梯功能</li>
+                                <li>1~64 = 前門</li>
+                                <li>101~164 = 後門</li>
+                            </ul>
+                            <h4>⚙️ 門控制：</h4>
+                            <ul>
+                                <li>參數 05-19 = 0：保持開門</li>
+                                <li>參數 05-19 = 1：開門 20 秒後關門</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-48 鎖梯基站</span>
+                                <span class="param-tag">05-19 關門控制</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- VIP 模式 -->
+                    <div class="mode-card">
+                        <h3>VIP 專用模式 <span class="badge">VIP</span></h3>
+                        <p class="description">專人專用電梯服務<span class="index-tag">[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-medium">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 啟動方式：</h4>
+                            <ul>
+                                <li>MI = 164 VIP (VIP 開關)</li>
+                                <li>參數 00-10 bit 0 = 1</li>
+                            </ul>
+                            <h4>⚙️ 運行特性：</h4>
+                            <ul>
+                                <li>電梯返回 VIP 層待命 (參數 03-33)</li>
+                                <li>待命時間：參數 03-32 (4 秒)</li>
+                                <li>禁止外召響應</li>
+                                <li>內召限制：參數 03-34 控制</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-32~03-34</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 司機模式 -->
+                    <div class="mode-card">
+                        <h3>司機操作模式 <span class="badge">Attendant</span></h3>
+                        <p class="description">司機手動控制電梯運行<span class="index-tag">[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 啟動方式：</h4>
+                            <ul>
+                                <li>MI = 165 ATS (司機模式開關)</li>
+                                <li>參數 00-10 bit 1 = 1</li>
+                            </ul>
+                            <h4>⚙️ 運行特性：</h4>
+                            <ul>
+                                <li>禁止外召響應</li>
+                                <li>司機控制開關門</li>
+                                <li>司機選擇目標樓層</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 醫療召回 -->
+                    <div class="mode-card">
+                        <h3>醫療召回模式 <span class="badge">Medical</span></h3>
+                        <p class="description">醫療緊急用途專用電梯<span class="index-tag">[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：高</div>
+                        <div class="details">
+                            <h4>📋 啟動方式：</h4>
+                            <ul>
+                                <li>MI = 179 SEV (醫療召回開關)</li>
+                                <li>參數 00-10 bit 13 = 1</li>
+                            </ul>
+                            <h4>⚙️ 運行特性：</h4>
+                            <ul>
+                                <li>優先響應醫療召回</li>
+                                <li>禁止其他外召</li>
+                                <li>快速響應</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 保安層模式 -->
+                    <div class="mode-card">
+                        <h3>保安層模式 <span class="badge">Security</span></h3>
+                        <p class="description">特定時段限制樓層訪問<span class="index-tag">[[236]](#__236)[[258]](#__258)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 設定參數：</h4>
+                            <ul>
+                                <li>保安層基站：參數 03-29 (0 = 關閉)</li>
+                                <li>開始時間：參數 03-30 (0~2359)</li>
+                                <li>結束時間：參數 03-31 (0~2359)</li>
+                            </ul>
+                            <h4>⚙️ 運行限制：</h4>
+                            <ul>
+                                <li>時段內只能到達保安層</li>
+                                <li>需刷卡才能到其他樓層</li>
+                                <li>參數 00-10 bit 10 = 1</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-29~03-31</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 其他運行模式 -->
+            <div class="mode-section">
+                <h2 class="section-title">
+                    <span class="icon">🟢</span>
+                    其他運行模式
+                </h2>
+                
+                <div class="mode-grid">
+                    <!-- 井道自學習 -->
+                    <div class="mode-card">
+                        <h3>井道自學習模式 <span class="badge">Shaft Learning</span></h3>
+                        <p class="description">自動學習井道參數和樓層位置<span class="index-tag">[[224]](#__224)[[225]](#__225)[[241]](#__241)[[242]](#__242)</span></p>
+                        <div class="priority-indicator priority-medium">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 執行步驟：</h4>
+                            <ul>
+                                <li>1. 設定參數 03-01 物理最高層、03-02 物理最低層</li>
+                                <li>2. 設定參數 04-03 井道學習速度 (建議 0.25 m/s)</li>
+                                <li>3. 將檢修開關切到檢修位置</li>
+                                <li>4. 設定參數 03-00 = 1</li>
+                                <li>5. 將檢修開關切到自動位置</li>
+                                <li>6. 電梯自動下行至 DLS1 再上行至 ULS1</li>
+                                <li>7. 完成後自動停在頂樓</li>
+                            </ul>
+                            <h4>⚙️ 學習內容：</h4>
+                            <ul>
+                                <li>各樓層平層位置 (參數 09、10 群)</li>
+                                <li>強迫減速開關位置</li>
+                                <li>限位開關位置</li>
+                            </ul>
+                            <h4>⚠️ 注意事項：</h4>
+                            <ul>
+                                <li>學習過程中參數 00-63 顯示狀態碼</li>
+                                <li>學習中途不可切換檢修開關</li>
+                                <li>完成後需執行制動力測試 (參數 03-67)</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-00 井道自學習</span>
+                                <span class="param-tag">03-01~03-02</span>
+                                <span class="param-tag">04-03 學習速度</span>
+                                <span class="param-tag">00-63 狀態碼</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 重上電定位 -->
+                    <div class="mode-card">
+                        <h3>重上電定位模式 <span class="badge">Re-Position</span></h3>
+                        <p class="description">斷電後重新上電的位置確認<span class="index-tag">[[236]](#__236)[[257]](#__257)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 定位方式：</h4>
+                            <ul>
+                                <li><strong>0</strong>：關閉功能</li>
+                                <li><strong>1</strong>：重上電後行駛至底樓定位</li>
+                                <li><strong>2</strong>：重上電後行駛至頂樓定位</li>
+                                <li><strong>3</strong>：依目前位置自動決定向上或向下定位</li>
+                            </ul>
+                            <h4>⚙️ 執行條件：</h4>
+                            <ul>
+                                <li>參數 00-10 bit 2 = 1</li>
+                                <li>編碼器位置資訊遺失</li>
+                                <li>需重新確認樓層位置</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-17 重上電定位</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 空閒返基站 -->
+                    <div class="mode-card">
+                        <h3>空閒返基站模式 <span class="badge">Idle Return</span></h3>
+                        <p class="description">無呼車時自動返回基站節能<span class="index-tag">[[236]](#__236)[[257]](#__257)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：低</div>
+                        <div class="details">
+                            <h4>📋 功能設定：</h4>
+                            <ul>
+                                <li>空閒基站：參數 03-05 (預設 1F)</li>
+                                <li>空閒時間：參數 03-06 (0 = 關閉功能)</li>
+                                <li>照明關閉：參數 03-07 (600 秒)</li>
+                                <li>風扇關閉：參數 03-08 (30 秒)</li>
+                            </ul>
+                            <h4>⚙️ 運行邏輯：</h4>
+                            <ul>
+                                <li>無呼車且超過設定時間</li>
+                                <li>自動返回基站</li>
+                                <li>關閉照明和風扇節能</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-05~03-08</span>
+                                <span class="param-tag">00-10 bit 3</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 群控運轉 -->
+                    <div class="mode-card">
+                        <h3>群控運轉模式 <span class="badge">Group Control</span></h3>
+                        <p class="description">多台電梯協同調度運行<span class="index-tag">[[229]](#__229)[[236]](#__236)[[257]](#__257)[[258]](#__258)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 基本設定：</h4>
+                            <ul>
+                                <li>群控站號：參數 03-03 (0~7)</li>
+                                <li>群控致能：參數 03-04 (0=單台 / 1=群控)</li>
+                                <li>主站設定：參數 03-68~03-74</li>
+                            </ul>
+                            <h4>⚙️ 調度策略：</h4>
+                            <ul>
+                                <li>反向加樓層：參數 03-91 (4 層)</li>
+                                <li>停一次時間：參數 03-92 (14.0 秒)</li>
+                                <li>分散等待時間：參數 03-75</li>
+                            </ul>
+                            <h4>🎯 高峰運轉：</h4>
+                            <ul>
+                                <li><strong>上行高峰</strong>：參數 03-76~03-77，MI = 59 UPK</li>
+                                <li><strong>下行高峰</strong>：參數 03-78~03-79，MI = 60 DPK</li>
+                                <li><strong>任意樓高峰</strong>：MI = 181 PK</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-03~03-04</span>
+                                <span class="param-tag">03-68~03-90</span>
+                                <span class="param-tag">00-61 連線狀態</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 每樓停模式 -->
+                    <div class="mode-card">
+                        <h3>每樓停模式 <span class="badge">Every Floor</span></h3>
+                        <p class="description">自動停靠每個樓層<span class="index-tag">[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：低</div>
+                        <div class="details">
+                            <h4>📋 啟動方式：</h4>
+                            <ul>
+                                <li>MI = 158 ESS (每樓停開關)</li>
+                                <li>參數 00-10 bit 11 = 1</li>
+                            </ul>
+                            <h4>⚙️ 運行特性：</h4>
+                            <ul>
+                                <li>自動登錄所有樓層內召</li>
+                                <li>依序停靠每個樓層</li>
+                                <li>適用於搬家或清潔</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 獨立運行 -->
+                    <div class="mode-card">
+                        <h3>獨立運行模式 <span class="badge">Independent</span></h3>
+                        <p class="description">脫離群控單獨運行<span class="index-tag">[[229]](#__229)[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：中</div>
+                        <div class="details">
+                            <h4>📋 脫離方式：</h4>
+                            <ul>
+                                <li>1. 設定參數 03-04 = 0</li>
+                                <li>2. 拔除 CAR 通訊線</li>
+                                <li>3. MI = 161 ISS (獨立運行開關) ON</li>
+                            </ul>
+                            <h4>⚙️ 運行特性：</h4>
+                            <ul>
+                                <li>參數 00-10 bit 9 = 1</li>
+                                <li>不受群控調度</li>
+                                <li>獨立響應呼車</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 搬貨專用 -->
+                    <div class="mode-card">
+                        <h3>搬貨專用模式 <span class="badge">Cargo</span></h3>
+                        <p class="description">貨物運輸專用設定<span class="index-tag">[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：低</div>
+                        <div class="details">
+                            <h4>📋 啟動方式：</h4>
+                            <ul>
+                                <li>MI = 162 IND (搬貨專用開關)</li>
+                                <li>參數 00-10 bit 14 = 1</li>
+                            </ul>
+                            <h4>⚙️ 運行特性：</h4>
+                            <ul>
+                                <li>延長開門時間</li>
+                                <li>禁止外召響應</li>
+                                <li>適用於貨物運輸</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 密碼呼車 -->
+                    <div class="mode-card">
+                        <h3>密碼呼車模式 <span class="badge">Password</span></h3>
+                        <p class="description">特定樓層需密碼才能呼車<span class="index-tag">[[236]](#__236)[[258]](#__258)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：低</div>
+                        <div class="details">
+                            <h4>📋 設定方式：</h4>
+                            <ul>
+                                <li>密碼設定：參數 03-45 (0~65535)</li>
+                                <li>參數 00-10 bit 12 = 1</li>
+                            </ul>
+                            <h4>⚙️ 使用方法：</h4>
+                            <ul>
+                                <li>MI = 183 PASSWORD (密碼呼車開關)</li>
+                                <li>MI = 184 PASSSET (密碼設定開關)</li>
+                                <li>需輸入正確密碼才能登錄內召</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-45 密碼</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 自動測試 -->
+                    <div class="mode-card">
+                        <h3>自動測試模式 <span class="badge">Auto Test</span></h3>
+                        <p class="description">自動運行測試電梯功能<span class="index-tag">[[255]](#__255)</span></p>
+                        <div class="priority-indicator priority-normal">優先權等級：低</div>
+                        <div class="details">
+                            <h4>📋 測試方式：</h4>
+                            <ul>
+                                <li><strong>0</strong>：不測試</li>
+                                <li><strong>1</strong>：頂底樓測試</li>
+                                <li><strong>2</strong>：每樓停測試</li>
+                                <li><strong>3</strong>：亂數叫車測試</li>
+                            </ul>
+                            <h4>⚙️ 測試參數：</h4>
+                            <ul>
+                                <li>測試方法：參數 02-03</li>
+                                <li>測試次數：參數 02-04 (65535 = 持續測試)</li>
+                                <li>間隔時間：參數 02-05 (300 秒)</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">02-03~02-05</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 門鎖旁路 -->
+                    <div class="mode-card">
+                        <h3>門鎖旁路模式 <span class="badge">Door Bypass</span></h3>
+                        <p class="description">緊急情況下繞過門鎖檢測<span class="index-tag">[[235]](#__235)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：高</div>
+                        <div class="details">
+                            <h4>📋 啟動方式：</h4>
+                            <ul>
+                                <li>MI = 56 DBP (門鎖旁路開關)</li>
+                                <li>參數 00-08 bit 5 = 1</li>
+                            </ul>
+                            <h4>⚠️ 安全警示：</h4>
+                            <ul>
+                                <li>MO = 105 BPSL (聲光報警) 啟動</li>
+                                <li>MO = 106 UDCL (轎底燈) 閃爍</li>
+                                <li>MO = 104 BZ (蜂鳴器) 鳴叫</li>
+                                <li>參數 02-10 = 1 可禁止鳴叫</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">02-10 不鳴叫</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- UPS 模式 -->
+                    <div class="mode-card">
+                        <h3>UPS 供電模式 <span class="badge">UPS</span></h3>
+                        <p class="description">不斷電系統供電時的運行<span class="index-tag">[[235]](#__235)[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：高</div>
+                        <div class="details">
+                            <h4>📋 啟動條件：</h4>
+                            <ul>
+                                <li>MI = 67 UPS (UPS 供電信號)</li>
+                                <li>參數 00-08 bit 8 = 1 (停機)</li>
+                                <li>參數 00-08 bit 9 = 1 (救出)</li>
+                                <li>參數 00-09 bit 11 = 1 (UPS 模式)</li>
+                            </ul>
+                            <h4>⚙️ 運行策略：</h4>
+                            <ul>
+                                <li>運行至指定樓層 (參數 03-09)</li>
+                                <li>或運行至最近平層</li>
+                                <li>開門後停止服務</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">03-09 指定樓層</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- EPS 模式 -->
+                    <div class="mode-card">
+                        <h3>EPS 緊急電源模式 <span class="badge">EPS</span></h3>
+                        <p class="description">緊急電源供電時的運行<span class="index-tag">[[35]](#__35)[[36]](#__36)[[235]](#__235)[[236]](#__236)</span></p>
+                        <div class="priority-indicator priority-high">優先權等級：高</div>
+                        <div class="details">
+                            <h4>📋 啟動條件：</h4>
+                            <ul>
+                                <li>MI = 54 EPS (緊急電源信號)</li>
+                                <li>參數 00-08 bit 10 = 1 (救出)</li>
+                                <li>EPS 端子供電 (框號 C、D)</li>
+                            </ul>
+                            <h4>⚙️ 運行限制：</h4>
+                            <ul>
+                                <li>風扇不運轉</li>
+                                <li>參數設定無法儲存</li>
+                                <li>無低電壓、欠相保護</li>
+                                <li>速度依參數 13-49 顯示</li>
+                                <li>DC bus 電壓依參數 13-48 顯示</li>
+                            </ul>
+                            <h4>🔧 相關參數：</h4>
+                            <div>
+                                <span class="param-tag">13-48~13-49</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 重要說明 -->
+            <div class="note-box">
+                <h4>⚠️ 重要說明</h4>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li style="padding: 5px 0;">✓ 手動運轉優先權：<strong>底坑檢修 = 轎頂檢修 &gt; 轎廂內檢修 &gt; 控盤檢修 &gt; 緊急電動運行</strong> <span class="index-tag">[[223]](#__223)</span></li>
+                    <li style="padding: 5px 0;">✓ 所有運行模式狀態可透過參數 <strong>00-08、00-09、00-10</strong> 監控 <span class="index-tag">[[234]](#__234)[[235]](#__235)[[236]](#__236)</span></li>
+                    <li style="padding: 5px 0;">✓ 速度指令代碼可透過參數 <strong>00-01</strong> 查看 <span class="index-tag">[[234]](#__234)</span></li>
+                    <li style="padding: 5px 0;">✓ 電梯運行方向可透過參數 <strong>00-62</strong> 監控 <span class="index-tag">[[242]](#__242)</span></li>
+                    <li style="padding: 5px 0;">✓ 詳細參數設定請參閱使用手冊第 11 章參數一覽表及第 12 章參數詳細說明</li>
+                </ul>
+            </div>
+            
+        </div>
+        
+        <div class="footer">
+            <p><strong>台達電子工業股份有限公司</strong></p>
+            <p>IED-S 系列電梯一體機使用手冊 | 韌體版本 V1.11 | 2023 年 10 月</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">本文件根據原廠使用手冊整理，實際應用請以最新版手冊為準</p>
+        </div>
+    </div>
+</body>
+</html>
