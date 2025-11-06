@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電梯AI預防保養系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #1e3c72;
+            --secondary-color: #2a5298;
+            --accent-color: #667eea;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --bg-light: #f9fafb;
+            --border-color: #e5e7eb;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', 'PingFang TC', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        /* 頂部導航 */
+        .top-nav {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 42px;
+            animation: rotate 3s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .logo-text h1 {
+            font-size: 26px;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .logo-text p {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #d1fae5;
+            color: #065f46;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* 標籤頁 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: var(--text-dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 統計卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color) 0%, #764ba2 100%);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .stat-icon {
+            font-size: 48px;
+            opacity: 0.9;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+        
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 500;
+        }
+        
+        .trend-up {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .trend-down {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* 主要內容區 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 電梯卡片 */
+        .elevator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .elevator-card {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .elevator-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .elevator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .elevator-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .health-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        
+        .health-excellent { background: #d1fae5; color: #065f46; }
+        .health-good { background: #dbeafe; color: #1e40af; }
+        .health-warning { background: #fef3c7; color: #92400e; }
+        .health-danger { background: #fee2e2; color: #991b1b; }
+        
+        .subsystem-scores {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .subsystem-item {
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 3px solid var(--accent-color);
+        }
+        
+        .subsystem-name {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        
+        .subsystem-score {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-excellent { background: var(--success-color); }
+        .progress-good { background: #3b82f6; }
+        .progress-warning { background: var(--warning-color); }
+        .progress-danger { background: var(--danger-color); }
+        
+        /* 預警列表 */
+        .alert-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .alert-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .alert-list::-webkit-scrollbar-track {
+            background: var(--bg-light);
+            border-radius: 10px;
+        }
+        
+        .alert-list::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 10px;
+        }
+        
+        .alert-item {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+        
+        .alert-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .alert-critical { border-color: var(--danger-color); background: linear-gradient(90deg, #fef2f2 0%, var(--bg-light) 100%); }
+        .alert-high { border-color: var(--warning-color); background: linear-gradient(90deg, #fffbeb 0%, var(--bg-light) 100%); }
+        .alert-medium { border-color: #3b82f6; background: linear-gradient(90deg, #eff6ff 0%, var(--bg-light) 100%); }
+        .alert-low { border-color: var(--success-color); background: linear-gradient(90deg, #f0fdf4 0%, var(--bg-light) 100%); }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            color: var(--text-dark);
+            font-size: 15px;
+        }
+        
+        .alert-time {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .alert-description {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .alert-action {
+            font-size: 13px;
+            color: var(--accent-color);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* 詳細資訊模態框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 32px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: var(--danger-color);
+            transform: rotate(90deg);
+        }
+        
+        .detail-section {
+            margin-bottom: 30px;
+        }
+        
+        .detail-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .metric-item {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .metric-unit {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-left: 3px;
+        }
+        
+        /* 圖表容器 */
+        .chart-container {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+        
+        /* 載入動畫 */
+        .loading {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 1400px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .top-nav {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .nav-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .elevator-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+        }
+        
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* 空狀態 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+        
+        .empty-state-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state-subtext {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 頂部導航 -->
+        <div class="top-nav">
+            <div class="logo">
+                <div class="logo-icon">🤖</div>
+                <div class="logo-text">
+                    <h1>電梯AI預防保養系統</h1>
+                    <p>Elevator AI Predictive Maintenance System v1.0</p>
+                </div>
+            </div>
+            <div class="nav-controls">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    系統運行中
+                </div>
+                <button class="btn btn-secondary" onclick="refreshData()">
+                    <span>🔄</span> 重新整理
+                </button>
+                <button class="btn btn-primary" onclick="exportReport()">
+                    <span>📊</span> 匯出報表
+                </button>
+            </div>
+        </div>
+        
+        <!-- 標籤頁 -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('overview')">📊 總覽</div>
+            <div class="tab" onclick="switchTab('elevators')">🏢 電梯監控</div>
+            <div class="tab" onclick="switchTab('alerts')">🚨 預警管理</div>
+            <div class="tab" onclick="switchTab('analysis')">📈 數據分析</div>
+            <div class="tab" onclick="switchTab('settings')">⚙️ 系統設定</div>
+        </div>
+        
+        <!-- 總覽標籤 -->
+        <div id="overview" class="tab-content active">
+            <!-- 統計卡片 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">🏢</div>
+                    </div>
+                    <div class="stat-value" id="totalElevators">5</div>
+                    <div class="stat-label">監控電梯總數</div>
+                    <span class="stat-trend trend-up">↑ 正常運行</span>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">💚</div>
+                    </div>
+                    <div class="stat-value" id="avgHealth">86.4</div>
+                    <div class="stat-label">平均健康度</div>
+                    <span class="stat-trend trend-up">↑ 2.3%</span>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">⚠️</div>
+                    </div>
+                    <div class="stat-value" id="totalAlerts">8</div>
+                    <div class="stat-label">待處理預警</div>
+                    <span class="stat-trend trend-down">↓ 3個</span>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">💰</div>
+                    </div>
+                    <div class="stat-value">4.5M</div>
+                    <div class="stat-label">年度節省成本 (NT$)</div>
+                    <span class="stat-trend trend-up">↑ 15%</span>
+                </div>
+            </div>
+            
+            <!-- 主要內容 -->
+            <div class="main-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span>🏗️</span> 電梯健康狀態
+                        </div>
+                    </div>
+                    <div id="elevatorOverview" class="elevator-grid"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span>🚨</span> 最新預警
+                        </div>
+                    </div>
+                    <div id="recentAlerts" class="alert-list"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 電梯監控標籤 -->
+        <div id="elevators" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>🏢</span> 所有電梯詳細監控
+                    </div>
+                    <button class="btn btn-primary" onclick="addElevator()">
+                        <span>➕</span> 新增電梯
+                    </button>
+                </div>
+                <div id="allElevators" class="elevator-grid"></div>
+            </div>
+        </div>
+        
+        <!-- 預警管理標籤 -->
+        <div id="alerts" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>🚨</span> 預警管理中心
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <select class="btn btn-secondary" id="alertFilter" onchange="filterAlerts()">
+                            <option value="all">全部預警</option>
+                            <option value="critical">嚴重</option>
+                            <option value="high">高</option>
+                            <option value="medium">中</option>
+                            <option value="low">低</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="allAlerts" class="alert-list"></div>
+            </div>
+        </div>
+        
+        <!-- 數據分析標籤 -->
+        <div id="analysis" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>📈</span> AI數據分析
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div style="text-align: center;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 20px;">圖表載入中...</p>
+                        <p style="font-size: 12px; margin-top: 10px;">整合 Chart.js 或 Google Charts 來顯示趨勢圖表</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 系統設定標籤 -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>⚙️</span> 系統設定
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h3>Google Apps Script 設定</h3>
+                    <div style="background: var(--bg-light); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: bold;">Apps Script Web App URL:</label>
+                        <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" 
+                               style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+                        <button class="btn btn-primary" style="margin-top: 15px;" onclick="saveGasUrl()">
+                            <span>💾</span> 儲存設定
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>閾值設定</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">馬達溫度上限</div>
+                            <input type="number" value="80" style="width: 80px; padding: 8px; text-align: center; border: 2px solid var(--border-color); border-radius: 8px; font-size: 18px; font-weight: bold;">
+                            <span class="metric-unit">°C</span>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">振動上限</div>
+                            <input type="number" value="0.15" step="0.01" style="width: 80px; padding: 8px; text-align: center; border: 2px solid var(--border-color); border-radius: 8px; font-size: 18px; font-weight: bold;">
+                            <span class="metric-unit">g</span>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">門力上限</div>
+                            <input type="number" value="150" style="width: 80px; padding: 8px; text-align: center; border: 2px solid var(--border-color); border-radius: 8px; font-size: 18px; font-weight: bold;">
+                            <span class="metric-unit">N</span>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">鋼索張力差上限</div>
+                            <input type="number" value="10" style="width: 80px; padding: 8px; text-align: center; border: 2px solid var(--border-color); border-radius: 8px; font-size: 18px; font-weight: bold;">
+                            <span class="metric-unit">%</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 20px;" onclick="saveThresholds()">
+                        <span>💾</span> 儲存閾值設定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 詳細資訊模態框 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 全域變數
+        let gasUrl = localStorage.getItem('gasUrl') || '';
+        let elevatorData = [];
+        let alertsData = [];
+        
+        // 模擬數據（實際應用中從GAS API獲取）
+        const mockElevatorData = [
+            {
+                id: 'ELV-001',
+                name: 'A棟1號梯',
+                location: 'A棟',
+                overallScore: 95,
+                grade: 'A',
+                minRUL: 180,
+                status: 'excellent',
+                subsystemScores: {
+                    mainMachine: 93,
+                    comfort: 96,
+                    door: 94,
+                    rope: 97
+                },
+                metrics: {
+                    motorTemp: 65,
+                    bearingTemp: 62,
+                    vibration: 0.08,
+                    doorForce: 120,
+                    ropeTension: 5
+                }
+            },
+            {
+                id: 'ELV-002',
+                name: 'A棟2號梯',
+                location: 'A棟',
+                overallScore: 88,
+                grade: 'B',
+                minRUL: 90,
+                status: 'good',
+                subsystemScores: {
+                    mainMachine: 85,
+                    comfort: 90,
+                    door: 88,
+                    rope: 89
+                },
+                metrics: {
+                    motorTemp: 68,
+                    bearingTemp: 65,
+                    vibration: 0.12,
+                    doorForce: 135,
+                    ropeTension: 7
+                }
+            },
+            {
+                id: 'ELV-003',
+                name: 'B棟1號梯',
+                location: 'B棟',
+                overallScore: 72,
+                grade: 'C',
+                minRUL: 14,
+                status: 'warning',
+                subsystemScores: {
+                    mainMachine: 78,
+                    comfort: 75,
+                    door: 65,
+                    rope: 70
+                },
+                metrics: {
+                    motorTemp: 75,
+                    bearingTemp: 72,
+                    vibration: 0.18,
+                    doorForce: 155,
+                    ropeTension: 11
+                }
+            },
+            {
+                id: 'ELV-004',
+                name: 'B棟2號梯',
+                location: 'B棟',
+                overallScore: 92,
+                grade: 'A',
+                minRUL: 150,
+                status: 'excellent',
+                subsystemScores: {
+                    mainMachine: 90,
+                    comfort: 93,
+                    door: 92,
+                    rope: 93
+                },
+                metrics: {
+                    motorTemp: 63,
+                    bearingTemp: 60,
+                    vibration: 0.09,
+                    doorForce: 115,
+                    ropeTension: 4
+                }
+            },
+            {
+                id: 'ELV-005',
+                name: 'C棟1號梯',
+                location: 'C棟',
+                overallScore: 85,
+                grade: 'B',
+                minRUL: 60,
+                status: 'good',
+                subsystemScores: {
+                    mainMachine: 82,
+                    comfort: 88,
+                    door: 84,
+                    rope: 86
+                },
+                metrics: {
+                    motorTemp: 67,
+                    bearingTemp: 64,
+                    vibration: 0.11,
+                    doorForce: 130,
+                    ropeTension: 6
+                }
+            }
+        ];
+        
+        const mockAlertsData = [
+            {
+                id: 'ALT-001',
+                elevatorId: 'ELV-003',
+                elevatorName: 'B棟1號梯',
+                type: 'bearing_overheat',
+                severity: 'high',
+                message: '軸承溫度過高: 78°C (閾值: 75°C)',
+                recommendation: '檢查軸承潤滑，考慮更換軸承',
+                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                status: 'pending'
+            },
+            {
+                id: 'ALT-002',
+                elevatorId: 'ELV-003',
+                elevatorName: 'B棟1號梯',
+                type: 'excessive_vibration',
+                severity: 'medium',
+                message: '振動過大: 0.18g (閾值: 0.15g)',
+                recommendation: '檢查聯軸器對中、軸承狀態、基礎螺栓',
+                timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
+                status: 'pending'
+            },
+            {
+                id: 'ALT-003',
+                elevatorId: 'ELV-002',
+                elevatorName: 'A棟2號梯',
+                type: 'door_maintenance_due',
+                severity: 'low',
+                message: '門循環次數接近保養週期: 850000次',
+                recommendation: '計劃更換門機皮帶、門吊輪等易損件',
+                timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+                status: 'pending'
+            },
+            {
+                id: 'ALT-004',
+                elevatorId: 'ELV-005',
+                elevatorName: 'C棟1號梯',
+                type: 'rope_tension_unbalance',
+                severity: 'medium',
+                message: '鋼索張力不均: 8.5% (閾值: 10%)',
+                recommendation: '建議調整鋼索張力，確保平衡',
+                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
+                status: 'pending'
+            },
+            {
+                id: 'ALT-005',
+                elevatorId: 'ELV-001',
+                elevatorName: 'A棟1號梯',
+                type: 'scheduled_maintenance',
+                severity: 'low',
+                message: '接近定期保養時數: 9500小時',
+                recommendation: '計劃進行全面保養，更換易損件',
+                timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                status: 'pending'
+            }
+        ];
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            renderOverview();
+            renderAllElevators();
+            renderAllAlerts();
+            
+            // 載入儲存的GAS URL
+            if (gasUrl) {
+                document.getElementById('gasUrl').value = gasUrl;
+            }
+        });
+        
+        // 載入數據
+        function loadData() {
+            // 實際應用中應該從GAS API獲取數據
+            elevatorData = mockElevatorData;
+            alertsData = mockAlertsData;
+            
+            // 更新統計數據
+            updateStats();
+        }
+        
+        // 更新統計數據
+        function updateStats() {
+            const avgHealth = elevatorData.reduce((sum, e) => sum + e.overallScore, 0) / elevatorData.length;
+            document.getElementById('avgHealth').textContent = avgHealth.toFixed(1);
+            document.getElementById('totalElevators').textContent = elevatorData.length;
+            document.getElementById('totalAlerts').textContent = alertsData.filter(a => a.status === 'pending').length;
+        }
+        
+        // 渲染總覽
+        function renderOverview() {
+            const container = document.getElementById('elevatorOverview');
+            container.innerHTML = '';
+            
+            elevatorData.slice(0, 4).forEach(elevator => {
+                container.innerHTML += createElevatorCard(elevator);
+            });
+            
+            renderRecentAlerts();
+        }
+        
+        // 渲染所有電梯
+        function renderAllElevators() {
+            const container = document.getElementById('allElevators');
+            container.innerHTML = '';
+            
+            elevatorData.forEach(elevator => {
+                container.innerHTML += createElevatorCard(elevator);
+            });
+        }
+        
+        // 創建電梯卡片
+        function createElevatorCard(elevator) {
+            const healthClass = elevator.overallScore >= 90 ? 'excellent' : 
+                                elevator.overallScore >= 80 ? 'good' : 
+                                elevator.overallScore >= 60 ? 'warning' : 'danger';
+            
+            return `
+                <div class="elevator-card" onclick="showElevatorDetail('${elevator.id}')">
+                    <div class="elevator-header">
+                        <div class="elevator-id">🔷 ${elevator.id} | ${elevator.name}</div>
+                        <span class="health-badge health-${healthClass}">${elevator.grade}級 ${elevator.overallScore}分</span>
+                    </div>
+                    <div style="margin: 15px 0; padding: 15px; background: white; border-radius: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: var(--text-light); font-size: 14px;">整體健康度</span>
+                            <span style="font-weight: bold; color: var(--primary-color);">${elevator.overallScore}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-${healthClass}" style="width: ${elevator.overallScore}%"></div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 13px; color: var(--text-light);">
+                            ⏱️ 預測RUL: ${elevator.minRUL}天
+                        </div>
+                    </div>
+                    <div class="subsystem-scores">
+                        <div class="subsystem-item">
+                            <div class="subsystem-name">🔧 主機系統</div>
+                            <div class="subsystem-score">${elevator.subsystemScores.mainMachine}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-${getScoreClass(elevator.subsystemScores.mainMachine)}" 
+                                     style="width: ${elevator.subsystemScores.mainMachine}%"></div>
+                            </div>
+                        </div>
+                        <div class="subsystem-item">
+                            <div class="subsystem-name">😊 乘坐舒適</div>
+                            <div class="subsystem-score">${elevator.subsystemScores.comfort}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-${getScoreClass(elevator.subsystemScores.comfort)}" 
+                                     style="width: ${elevator.subsystemScores.comfort}%"></div>
+                            </div>
+                        </div>
+                        <div class="subsystem-item">
+                            <div class="subsystem-name">🚪 門系統</div>
+                            <div class="subsystem-score">${elevator.subsystemScores.door}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-${getScoreClass(elevator.subsystemScores.door)}" 
+                                     style="width: ${elevator.subsystemScores.door}%"></div>
+                            </div>
+                        </div>
+                        <div class="subsystem-item">
+                            <div class="subsystem-name">🔗 鋼索系統</div>
+                            <div class="subsystem-score">${elevator.subsystemScores.rope}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-${getScoreClass(elevator.subsystemScores.rope)}" 
+                                     style="width: ${elevator.subsystemScores.rope}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染最新預警
+        function renderRecentAlerts() {
+            const container = document.getElementById('recentAlerts');
+            container.innerHTML = '';
+            
+            const recentAlerts = alertsData.slice(0, 5);
+            
+            if (recentAlerts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <div class="empty-state-text">目前沒有預警</div>
+                        <div class="empty-state-subtext">所有電梯運行正常</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            recentAlerts.forEach(alert => {
+                container.innerHTML += createAlertItem(alert);
+            });
+        }
+        
+        // 渲染所有預警
+        function renderAllAlerts() {
+            const container = document.getElementById('allAlerts');
+            container.innerHTML = '';
+            
+            if (alertsData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <div class="empty-state-text">目前沒有預警</div>
+                        <div class="empty-state-subtext">所有電梯運行正常</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            alertsData.forEach(alert => {
+                container.innerHTML += createAlertItem(alert);
+            });
+        }
+        
+        // 創建預警項目
+        function createAlertItem(alert) {
+            const icon = alert.severity === 'critical' ? '🔴' : 
+                        alert.severity === 'high' ? '🟠' : 
+                        alert.severity === 'medium' ? '🔵' : '🟢';
+            
+            const timeAgo = getTimeAgo(alert.timestamp);
+            
+            return `
+                <div class="alert-item alert-${alert.severity}">
+                    <div class="alert-header">
+                        <div class="alert-title">${icon} ${alert.elevatorName} - ${alert.type}</div>
+                        <div class="alert-time">${timeAgo}</div>
+                    </div>
+                    <div class="alert-description">${alert.message}</div>
+                    <div class="alert-action">👉 ${alert.recommendation}</div>
+                </div>
+            `;
+        }
+        
+        // 顯示電梯詳細資訊
+        function showElevatorDetail(elevatorId) {
+            const elevator = elevatorData.find(e => e.id === elevatorId);
+            if (!elevator) return;
+            
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <h2 style="color: var(--primary-color); margin-bottom: 20px;">
+                    ${elevator.id} - ${elevator.name} 詳細資訊
+                </h2>
+                
+                <div class="detail-section">
+                    <h3>整體評估</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">健康評分</div>
+                            <div class="metric-value">${elevator.overallScore}<span class="metric-unit">分</span></div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">評級</div>
+                            <div class="metric-value">${elevator.grade}<span class="metric-unit">級</span></div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">預測RUL</div>
+                            <div class="metric-value">${elevator.minRUL}<span class="metric-unit">天</span></div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">狀態</div>
+                            <div class="metric-value" style="font-size: 18px;">${getStatusText(elevator.status)}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>🔧 主機系統 (${elevator.subsystemScores.mainMachine}分)</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">馬達溫度</div>
+                            <div class="metric-value">${elevator.metrics.motorTemp}<span class="metric-unit">°C</span></div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">軸承溫度</div>
+                            <div class="metric-value">${elevator.metrics.bearingTemp}<span class="metric-unit">°C</span></div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">振動值</div>
+                            <div class="metric-value">${elevator.metrics.vibration}<span class="metric-unit">g</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>🚪 門系統 (${elevator.subsystemScores.door}分)</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">開關門力</div>
+                            <div class="metric-value">${elevator.metrics.doorForce}<span class="metric-unit">N</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>🔗 鋼索系統 (${elevator.subsystemScores.rope}分)</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">張力差</div>
+                            <div class="metric-value">${elevator.metrics.ropeTension}<span class="metric-unit">%</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <p>歷史趨勢圖表（可整合Chart.js顯示）</p>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
+        // 關閉模態框
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+        
+        // 切換標籤
+        function switchTab(tabName) {
+            // 移除所有active類
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // 添加active類到選中的標籤
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+        
+        // 重新整理數據
+        function refreshData() {
+            const btn = event.target.closest('.btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>🔄</span> 載入中...';
+            
+            // 模擬API請求
+            setTimeout(() => {
+                loadData();
+                renderOverview();
+                renderAllElevators();
+                renderAllAlerts();
+                
+                btn.disabled = false;
+                btn.innerHTML = '<span>🔄</span> 重新整理';
+                
+                alert('✅ 數據已更新！');
+            }, 1000);
+        }
+        
+        // 匯出報表
+        function exportReport() {
+            alert('📊 報表匯出功能開發中...\n\n將支援匯出為 PDF 或 Excel 格式');
+        }
+        
+        // 新增電梯
+        function addElevator() {
+            alert('➕ 新增電梯功能開發中...\n\n請在Google Sheets中添加電梯資料');
+        }
+        
+        // 篩選預警
+        function filterAlerts() {
+            const filter = document.getElementById('alertFilter').value;
+            const container = document.getElementById('allAlerts');
+            
+            let filteredAlerts = alertsData;
+            if (filter !== 'all') {
+                filteredAlerts = alertsData.filter(a => a.severity === filter);
+            }
+            
+            container.innerHTML = '';
+            filteredAlerts.forEach(alert => {
+                container.innerHTML += createAlertItem(alert);
+            });
+        }
+        
+        // 儲存GAS URL
+        function saveGasUrl() {
+            const url = document.getElementById('gasUrl').value;
+            if (url) {
+                localStorage.setItem('gasUrl', url);
+                gasUrl = url;
+                alert('✅ Google Apps Script URL 已儲存！');
+            } else {
+                alert('⚠️ 請輸入有效的URL');
+            }
+        }
+        
+        // 儲存閾值設定
+        function saveThresholds() {
+            alert('✅ 閾值設定已儲存！\n\n實際應用中會同步到Google Sheets');
+        }
+        
+        // 輔助函數
+        function getScoreClass(score) {
+            if (score >= 90) return 'excellent';
+            if (score >= 80) return 'good';
+            if (score >= 60) return 'warning';
+            return 'danger';
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'excellent': '優秀',
+                'good': '良好',
+                'warning': '注意',
+                'critical': '嚴重'
+            };
+            return statusMap[status] || status;
+        }
+        
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const diff = now - timestamp;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) return `${days}天前`;
+            if (hours > 0) return `${hours}小時前`;
+            return '剛剛';
+        }
+        
+        // 點擊模態框外部關閉
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
