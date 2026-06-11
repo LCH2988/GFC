@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IES 樣機破壞性測試 — 問題歷程與統計分析</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif; background: #f0f2f5; color: #222; font-size: 14px; }
+    .page-header { background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%); color: white; padding: 28px 40px; display: flex; justify-content: space-between; align-items: center; }
+    .page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+    .page-header .meta { font-size: 12px; opacity: 0.85; margin-top: 6px; }
+    .badge-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-pass { background: #22c55e; color: white; }
+    .badge-pending { background: #f59e0b; color: white; }
+    .badge-fail { background: #ef4444; color: white; }
+    .nav-tabs { background: white; padding: 0 40px; display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; overflow-x: auto; }
+    .nav-tab { padding: 14px 20px; cursor: pointer; font-size: 13px; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; }
+    .nav-tab:hover { color: #2563a8; }
+    .nav-tab.active { color: #2563a8; border-bottom-color: #2563a8; }
+    .content { padding: 28px 40px; max-width: 1400px; margin: 0 auto; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-top: 4px solid; }
+    .stat-card.total { border-color: #2563a8; }
+    .stat-card.pass { border-color: #22c55e; }
+    .stat-card.pending { border-color: #f59e0b; }
+    .stat-card.issue { border-color: #ef4444; }
+    .stat-card.doc { border-color: #8b5cf6; }
+    .stat-num { font-size: 36px; font-weight: 800; margin-bottom: 4px; }
+    .stat-card.total .stat-num { color: #2563a8; }
+    .stat-card.pass .stat-num { color: #22c55e; }
+    .stat-card.pending .stat-num { color: #f59e0b; }
+    .stat-card.issue .stat-num { color: #ef4444; }
+    .stat-card.doc .stat-num { color: #8b5cf6; }
+    .stat-label { font-size: 12px; color: #6b7280; font-weight: 600; }
+    .chart-section { background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .chart-title { font-size: 15px; font-weight: 700; color: #1a3a5c; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 12px; gap: 12px; }
+    .bar-label { width: 220px; font-size: 12px; color: #374151; flex-shrink: 0; text-align: right; }
+    .bar-track { flex: 1; background: #f3f4f6; border-radius: 6px; height: 28px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 700; color: white; }
+    .bar-pass { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .bar-pending { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .bar-count { font-size: 12px; color: #6b7280; width: 30px; text-align: right; flex-shrink: 0; }
+    .issue-card { background: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+    .issue-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+    .issue-header:hover { background: #f8fafc; }
+    .issue-num { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+    .issue-title { flex: 1; font-size: 15px; font-weight: 700; color: #1a3a5c; }
+    .issue-status { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .status-pass { background: #dcfce7; color: #16a34a; }
+    .status-pending { background: #fef3c7; color: #d97706; }
+    .toggle-icon { font-size: 18px; color: #9ca3af; transition: transform 0.3s; }
+    .issue-body { padding: 0 20px 20px; display: none; }
+    .issue-body.open { display: block; }
+    .sub-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+    .sub-table th { background: #f1f5f9; color: #374151; padding: 10px 12px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; }
+    .sub-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top; line-height: 1.6; }
+    .sub-table tr:last-child td { border-bottom: none; }
+    .sub-table tr:hover td { background: #f8fafc; }
+    .td-pass { color: #16a34a; font-weight: 700; }
+    .td-pending { color: #d97706; font-weight: 700; }
+    .info-block { margin-top: 14px; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.7; }
+    .info-block.problem { background: #fff7ed; border-left: 4px solid #f59e0b; }
+    .info-block.delta { background: #f0fdf4; border-left: 4px solid #22c55e; }
+    .info-block.dawei { background: #fef2f2; border-left: 4px solid #ef4444; }
+    .info-block.note { background: #f5f3ff; border-left: 4px solid #8b5cf6; }
+    .info-label { font-weight: 800; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-block.problem .info-label { color: #d97706; }
+    .info-block.delta .info-label { color: #16a34a; }
+    .info-block.dawei .info-label { color: #dc2626; }
+    .info-block.note .info-label { color: #7c3aed; }
+    .action-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .action-table th { background: #1a3a5c; color: white; padding: 10px 14px; text-align: left; }
+    .action-table td { padding: 10px 14px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    .action-table tr:nth-child(even) td { background: #f8fafc; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; margin: 1px; }
+    .tag-delta { background: #dcfce7; color: #16a34a; }
+    .tag-dawei { background: #fee2e2; color: #dc2626; }
+    .tag-elec { background: #dbeafe; color: #1d4ed8; }
+    .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #374151; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .fault-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .fault-table th { background: #4c1d95; color: white; padding: 10px 14px; text-align: left; }
+    .fault-table td { padding: 10px 14px; border-bottom: 1px solid #e5e7eb; }
+    .fault-table tr:nth-child(even) td { background: #faf5ff; }
+    .missing { color: #dc2626; font-weight: 700; }
+    .exists { color: #16a34a; font-weight: 700; }
+    .timeline { position: relative; padding-left: 30px; }
+    .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
+    .tl-item { position: relative; margin-bottom: 20px; }
+    .tl-dot { position: absolute; left: -24px; top: 4px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; }
+    .tl-dot.pass { background: #22c55e; }
+    .tl-dot.pending { background: #f59e0b; }
+    .tl-dot.action { background: #2563a8; }
+    .tl-dot.future { background: #9ca3af; }
+    .tl-content { background: white; border-radius: 8px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-size: 13px; line-height: 1.6; }
+    .tl-date { font-size: 11px; color: #9ca3af; margin-bottom: 4px; }
+    .tl-title { font-weight: 700; color: #1a3a5c; margin-bottom: 4px; }
+    .donut-wrap { display: flex; align-items: center; gap: 40px; flex-wrap: wrap; }
+    .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+    .donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .donut-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    @media (max-width: 768px) {
+      .page-header { padding: 20px; flex-direction: column; align-items: flex-start; }
+      .content { padding: 16px; }
+      .nav-tabs { padding: 0 16px; }
+      .bar-label { width: 120px; font-size: 11px; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>🔬 IES 樣機破壞性測試 — 問題歷程與統計分析</h1>
+    <div class="meta">試驗塔 B 坑 ｜ 測試日期：2026.05.28 ｜ 複測日期：2026.05.29 ｜ 問題回覆：2026.06.09</div>
+    <div class="badge-group">
+      <span class="badge badge-pass">✓ PASS 7項</span>
+      <span class="badge badge-pending">⚠ 待討論 9項</span>
+      <span class="badge badge-fail">✗ 故障碼缺漏 6種</span>
+    </div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('overview')">📊 統計總覽</div>
+  <div class="nav-tab" onclick="switchTab('issues')">📋 問題歷程</div>
+  <div class="nav-tab" onclick="switchTab('faultcodes')">🔢 故障碼清單</div>
+  <div class="nav-tab" onclick="switchTab('actions')">✅ 後續行動</div>
+  <div class="nav-tab" onclick="switchTab('timeline')">🕐 時間軸</div>
+</div>
+
+<div class="content">
+
+  <!-- TAB 1: 統計總覽 -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="stats-grid">
+      <div class="stat-card total"><div class="stat-num">16</div><div class="stat-label">測試總項數</div></div>
+      <div class="stat-card pass"><div class="stat-num">7</div><div class="stat-label">PASS 通過</div></div>
+      <div class="stat-card pending"><div class="stat-num">9</div><div class="stat-label">待討論</div></div>
+      <div class="stat-card issue"><div class="stat-num">8</div><div class="stat-label">問題點數</div></div>
+      <div class="stat-card doc"><div class="stat-num">6</div><div class="stat-label">缺漏故障碼種類</div></div>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-title">📊 各項次測試結果分佈</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>PASS</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>待討論</div>
+      </div>
+      <div class="bar-row"><div class="bar-label">項次1 NOR切至INS</div><div class="bar-track"><div class="bar-fill bar-pass" style="width:100%">PASS</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次2 安全迴路CC</div><div class="bar-track"><div class="bar-fill bar-pass" style="width:100%">PASS</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次3 開車廂門DC-OFF</div><div class="bar-track"><div class="bar-fill bar-pass" style="width:100%">PASS</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次4 開乘場門HDC-OFF</div><div class="bar-track"><div class="bar-fill bar-pass" style="width:100%">PASS</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次5 Brake-OFF</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:50%">部分待討論</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次6 BLS-OFF</div><div class="bar-track"><div class="bar-fill bar-pass" style="width:100%">PASS</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次7 MTH動作</div><div class="bar-track"><div class="bar-fill bar-pass" style="width:100%">PASS</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次8 3LS異常檢出</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:100%">待討論</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次9 4LS異常檢出</div><div class="bar-track"><div class="bar-fill bar-pass" style="width:100%">PASS</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次10 PG斷線</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:50%">部分待討論</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次11 CAN斷線(轎頂板)</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:100%">待討論</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次12 CAN斷線(乘場)</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:100%">待討論</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次13 APS code tape</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:100%">待討論</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次14 APS sensor</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:100%">待討論</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次15 APS clip</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:50%">部分待討論</div></div></div>
+      <div class="bar-row"><div class="bar-label">項次16 電壓變動</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:50%">部分待討論</div></div></div>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-title">🗂️ 問題類型分析</div>
+      <div class="bar-row"><div class="bar-label">手冊故障碼說明缺漏</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:100%">5 項次</div></div><div class="bar-count">5</div></div>
+      <div class="bar-row"><div class="bar-label">故障行為邏輯不一致</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:60%">3 項次</div></div><div class="bar-count">3</div></div>
+      <div class="bar-row"><div class="bar-label">功能異常/不符規範</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:40%">2 項次</div></div><div class="bar-count">2</div></div>
+      <div class="bar-row"><div class="bar-label">電研要求確認</div><div class="bar-track"><div class="bar-fill bar-pending" style="width:20%">1 項次</div></div><div class="bar-count">1</div></div>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-title">📌 通過率圓餅圖</div>
+      <div class="donut-wrap">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="60" fill="none" stroke="#f3f4f6" stroke-width="28"/>
+          <circle cx="80" cy="80" r="60" fill="none" stroke="#22c55e" stroke-width="28"
+            stroke-dasharray="164.93 212.37" stroke-dashoffset="0" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="60" fill="none" stroke="#f59e0b" stroke-width="28"
+            stroke-dasharray="212.37 164.93" stroke-dashoffset="-164.93" transform="rotate(-90 80 80)"/>
+          <text x="80" y="76" text-anchor="middle" font-size="20" font-weight="800" fill="#1a3a5c">44%</text>
+          <text x="80" y="96" text-anchor="middle" font-size="11" fill="#6b7280">通過率</text>
+        </svg>
+        <div class="donut-legend">
+          <div class="donut-legend-item"><div class="donut-dot" style="background:#22c55e"></div><span>PASS：7 項（44%）</span></div>
+          <div class="donut-legend-item"><div class="donut-dot" style="background:#f59e0b"></div><span>待討論：9 項（56%）</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: 問題歷程 -->
+  <div class="tab-panel" id="tab-issues">
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">5</div>
+        <div class="issue-title">Brake-OFF（煞車斷線）</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="200">動作</th><th>狀態</th><th width="120">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>5-a</b></td>
+            <td>6F 停止中，BK1-/BK2- 斷線，車廂登錄 5F 叫車</td>
+            <td>煞車未釋放，電梯不動，保持開門，永久故障；清除 F115 後才出現 F114，需<b>兩次 Reset</b></td>
+            <td>F115 → F114</td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>5-b</b></td>
+            <td>6F→5F 運行中，BK1-/BK2- 斷線</td>
+            <td>電梯急停（電流飆至 ~166.12A），永久故障；F115+F114 同時出現，<b>一次 Reset</b> 即可</td>
+            <td>F115 + F114</td>
+            <td class="td-pass">✅ PASS</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>5-a 先出現 F115，清除後才出現 F114，需兩次 Reset 才能復原；5-b 同時出現兩筆，一次 Reset 即可，行為不一致。</div>
+        <div class="info-block delta"><div class="info-label">🟢 台達回覆（6/9）</div>
+          <b>5-a</b>：BK1- 及 BK2- <b>同時被斷線</b>，偵測到 F114、F115 兩筆故障，需按 2 次 Reset。<br>
+          <b>5-b</b>：BK1- 及 BK2- <b>不是同時被斷線</b>，先斷開的被偵測到後，因已非運行中，不再偵測另一邊，故只有 1 筆，只需 1 次 Reset。
+        </div>
+        <div class="info-block dawei"><div class="info-label">🔴 大偉對策</div>依偵測的錯誤次數按壓 Reset 清除。</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">8</div>
+        <div class="issue-title">3LS 方向限制 Limit sw 異常檢出</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="200">動作</th><th>狀態</th><th width="120">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>8-a</b></td>
+            <td>電梯 6F→10F 運行中，將 3LS 開路</td>
+            <td>急停，拉樓平至 7F，開關門後<b>仍應答 10F 叫車</b>（應取消）</td>
+            <td>F176（下行限位動作）</td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>8-b</b></td>
+            <td>電梯 12F→6F 運行中，將 3LS 開路</td>
+            <td>急停，拉樓平至 11F，開關門後 EMOP 顯示正常服務中（可上行，禁下行）</td>
+            <td>F176（下行限位動作）</td>
+            <td class="td-pass">✅ PASS</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>8-a 故障急停後仍應答車廂叫車；9-a 項電梯會取消車廂叫車，兩者行為不一致。</div>
+        <div class="info-block dawei"><div class="info-label">🔴 大偉對策（6/9）</div>3LS、4LS 異常觸發立即停止並取消所有叫車，保持停止狀態鎖住，直至開關復歸與 Reset 清除。</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#dcfce7;color:#16a34a;">9</div>
+        <div class="issue-title">4LS 方向限制 Limit sw 異常檢出（對照參考）</div>
+        <span class="issue-status status-pass">✅ 參考項</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="200">動作</th><th>狀態</th><th width="120">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>9-a</b></td>
+            <td>電梯 10F→6F 運行中，將 4LS 開路</td>
+            <td>急停，拉樓平至 8F，開關門後 EMOP 正常服務中（可下行，禁上行），<b>正確取消車廂叫車</b></td>
+            <td>F172（上行限位動作）</td>
+            <td class="td-pass">✅ PASS</td>
+          </tr>
+          <tr>
+            <td><b>9-b</b></td>
+            <td>電梯 6F→12F 運行中，將 4LS 開路</td>
+            <td>急停，拉樓平至 7F，開關門後 EMOP 正常服務中（可下行，禁上行）</td>
+            <td>F172（上行限位動作）</td>
+            <td class="td-pass">✅ PASS</td>
+          </tr>
+        </table>
+        <div class="info-block note"><div class="info-label">📌 備註</div>9-a 正確取消叫車，與 8-a 行為不一致，作為對照參考。</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">10</div>
+        <div class="issue-title">PG 速度回授斷線試驗</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="200">動作</th><th>狀態</th><th width="150">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>10-a</b></td>
+            <td>6F 停止中，PG 斷線</td>
+            <td>保持開門，電梯故障；復歸後恢復正常</td>
+            <td>E074（PG 絕對訊號異常）</td>
+            <td class="td-pass">✅ PASS</td>
+          </tr>
+          <tr>
+            <td><b>10-b</b></td>
+            <td>4F→6F 運行中，PG 斷線</td>
+            <td>電梯急停，<b>永久故障</b>；需清除故障並斷電重送才能恢復</td>
+            <td>E043 + <span class="missing">1144❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>故障碼 <b>1144</b> 在 IED 手冊中無對應說明，手冊需更新。</div>
+        <div class="info-block delta"><div class="info-label">🟢 台達回覆（6/9）</div>待補齊文件說明。</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">11</div>
+        <div class="issue-title">CAN 通訊斷線試驗（EMOP→轎頂板）</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="55">狀態</th><th width="220">動作</th><th>結果</th><th width="140">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>11-a</b></td><td>NOR</td>
+            <td>12F 停止中，CAN 斷線後車廂登錄 10F</td>
+            <td>車廂叫車及 PDO 無效，EMOP 顯示 KCAN 異常</td>
+            <td>F147 + <span class="missing">1147❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>11-b</b></td><td>NOR</td>
+            <td>12F 停止，內召 10F，運行中 CAN 斷線</td>
+            <td>電梯急停，EMOP 顯示 KCAN 異常</td>
+            <td>F147 + <span class="missing">1147❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>11-c</b></td><td>INS</td>
+            <td>12F 停止中，CAN 斷線後 DN 運行</td>
+            <td>正常 DN/UP 運行；切回 NOR 後拉樓平恢復正常</td>
+            <td>F137 + <span class="missing">1147❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>11-d</b></td><td>INS</td>
+            <td>12F 停止，DN 運行中 CAN 斷線</td>
+            <td>正常 DN/UP 運行；切回 NOR 後拉樓平恢復正常</td>
+            <td><span class="missing">1147❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>
+          1. 故障碼 <b>1147</b> 在 IED 手冊中無對應說明，手冊需更新。<br>
+          2. KCAN 斷線後 PDO 無效，存在安全疑慮。
+        </div>
+        <div class="info-block delta"><div class="info-label">🟢 台達回覆（6/9）</div>
+          文件：待補齊說明。<br>
+          PDO：電研回覆樣機不整改，未來 PDO 改為實體線路。
+        </div>
+        <div class="info-block dawei"><div class="info-label">🔴 大偉對策（6/9）</div>第三版電路已加入，DU 與 PU 斷線後 APS 於門區，直接持續門開（PDO 功能有無都可）。</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">12</div>
+        <div class="issue-title">CAN 通訊斷線試驗（EMOP→乘場）</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="55">狀態</th><th width="220">動作</th><th>結果</th><th width="110">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>12-a</b></td><td>NOR</td>
+            <td>12F 停止中，CAN 斷線後乘場 11F/10F(DN) 叫車</td>
+            <td>乘場叫車面板斷電、叫車無效；EMOP 交錯顯示 Hcan 異常與 PDU 斷線</td>
+            <td><span class="missing">1147❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>12-b</b></td><td>NOR</td>
+            <td>12F 停止，乘場 10F/3F 叫車，運行中 CAN 斷線</td>
+            <td>乘場面板斷電，電梯仍正常應答已登錄叫車</td>
+            <td><span class="missing">1147❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>故障碼 <b>1147</b> 在 IED 手冊中無對應說明；建議新增乘場通訊斷線相關故障碼。</div>
+        <div class="info-block delta"><div class="info-label">🟢 台達回覆（6/9）</div>待補齊文件說明。</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">13</div>
+        <div class="issue-title">APS Code Tape 異常測試</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="200">動作</th><th>狀態</th><th width="220">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>13-b</b></td>
+            <td>NOR 狀態，9F 遮蔽 code tape（65cm），車廂 11F 叫車</td>
+            <td>電梯急停，EMOP 顯示 SMR；約 8 秒後拉樓平回 10F</td>
+            <td><span class="missing">1181❌</span> + <span class="missing">209❌</span> + <span class="missing">1182❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>故障碼 <b>1181、1182、209</b> 在 IED 手冊中無對應說明；建議新增 APS 相關故障碼。</div>
+        <div class="info-block delta"><div class="info-label">🟢 台達回覆（6/9）</div>待補齊文件說明。</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">14</div>
+        <div class="issue-title">APS Sensor 異常測試</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="200">動作</th><th>狀態</th><th width="180">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>14-a</b></td>
+            <td>INS 狀態，1F 遮蔽 sensor，UP 運行</td>
+            <td>著床三根恆 OFF；UP 可到 2F，DN 可到 1F；<b>UP 與 DN 速度不一致</b></td>
+            <td>137 + <span class="missing">1181❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>14-b</b></td>
+            <td>NOR 狀態，1F 遮蔽 sensor，乘場 2F(UP) 叫車</td>
+            <td>電梯嘗試應答，啟動約 3.5 秒後急停（<b>靜止下不應啟動</b>）</td>
+            <td><span class="missing">1181❌</span> + <span class="missing">244❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>14-c</b></td>
+            <td>NOR→INS UP 脫離樓平後斷電遮 sensor，切回 NOR 重送電（電研追加）</td>
+            <td>送電後 EMOP 顯示 SMR，電梯故障（與電研口述不一致）</td>
+            <td>185 + <span class="missing">209❌</span> + <span class="missing">1181❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>
+          1. 故障碼 <b>1181、244、209</b> 在 IED 手冊無說明；<b>185</b> 故障原因不明。<br>
+          2. <b>14-a</b>：UP/DN 速度不一致。<br>
+          3. <b>14-b</b>：靜止遮蔽狀態下不應啟動，應直接呈現故障。<br>
+          4. <b>14-c</b>：電梯狀態與電研口述不一致，是否符合電研要求待確認。
+        </div>
+        <div class="info-block delta"><div class="info-label">🟢 台達回覆（6/9）</div>
+          <b>14-a</b>：檢修運轉有運行到樓平區自動降速功能，因在 1F 遮蔽 sensor，系統認定車廂在底樓，下行走較慢速度。APS 異常先跳警告碼 1181（APS 鏡頭遮蔽），運行 3 秒後仍持續異常才跳故障碼 F244（APS 位置錯誤）；3 秒內恢復則繼續運轉。<br><br>
+          <b>14-c</b>：正常運轉於非樓平斷電，復電後於 APS 異常依斷電前紀錄，往頂底樓移動並參照 3LS、4LS 位置開門。
+        </div>
+        <div class="info-block dawei"><div class="info-label">🔴 大偉對策（6/9）</div>
+          <b>14-b</b>：IES 電梯啟動前，APS 失效不應啟動，取消叫車並故障直至 APS 恢復。（測試時須將 SMR 短路）<br>
+          <b>14-c</b>：正常運轉於非樓平斷電，復電後於 APS 異常依斷電前紀錄，往頂底樓移動並參照 3LS、4LS 位置開門。（測試時須將 SMR 短路）
+        </div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">15</div>
+        <div class="issue-title">APS Clip（位置夾具）異常測試</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="200">動作</th><th>狀態</th><th width="110">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>15-a</b></td>
+            <td>NOR 狀態，9F 遮蔽 10F clip，車廂 10F 叫車</td>
+            <td>電梯正常應答到 10F</td>
+            <td><span class="missing">1181❌</span></td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+          <tr>
+            <td><b>15-b</b></td>
+            <td>NOR 狀態，9F 遮蔽 10F clip，車廂 11F 叫車</td>
+            <td>電梯正常應答到 11F</td>
+            <td>無故障碼</td>
+            <td class="td-pass">✅ PASS</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>故障碼 <b>1181</b> 在 IED 手冊中無對應說明，手冊需更新。</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header" onclick="toggleIssue(this)">
+        <div class="issue-num" style="background:#fef3c7;color:#d97706;">16</div>
+        <div class="issue-title">電壓變動測試</div>
+        <span class="issue-status status-pending">⚠ 待討論</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="issue-body">
+        <table class="sub-table">
+          <tr><th width="50">子項</th><th width="200">動作</th><th>狀態</th><th width="100">故障碼</th><th width="80">判定</th></tr>
+          <tr>
+            <td><b>16-c</b></td>
+            <td>電壓 418V（+10%）</td>
+            <td>系統工作正常，電梯 UP/DN 運行正常</td>
+            <td>無</td>
+            <td class="td-pass">✅ PASS</td>
+          </tr>
+          <tr>
+            <td><b>16-d</b></td>
+            <td>電壓 323V（-15%）</td>
+            <td>系統工作異常，電梯<b>無法運行</b>；AMC3 不斷嘗試投入均失敗</td>
+            <td>無</td>
+            <td class="td-pending">⚠ 待討論</td>
+          </tr>
+        </table>
+        <div class="info-block problem"><div class="info-label">⚫ 問題描述</div>內規要求電壓變動 <b>-15%</b> 時系統應可正常運行，但實測結果為系統異常無法運行，不符合內規要求。</div>
+        <div class="info-block delta"><div class="info-label">🟢 台達回覆（6/9）</div>
+          電壓變動測試僅改變<b>控制迴路電壓</b>，動力迴路正常；控制迴路電源由 <b>AVR 提供</b>，控制電壓應都在 DC24。<br>
+          AMC3 受控於 AMC2，「ACM3 不斷嘗試投入均失敗」應為 AMC2 投入嘗試運行所致。<br>
+          測試報告圖內容顯示連煞車器都沒釋放，需先釐清是哪些訊號或迴路導致啟動失效。<br>
+          📅 <b>6/10 台達人員到達，一同再次測試。</b>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB 3: 故障碼清單 -->
+  <div class="tab-panel" id="tab-faultcodes">
+    <div class="chart-section">
+      <div class="chart-title">🔢 故障碼完整清單（含手冊狀態）</div>
+      <table class="fault-table">
+        <tr><th>故障碼</th><th>出現項次</th><th>手持操作器顯示說明</th><th>IED 手冊狀態</th><th>備註</th></tr>
+        <tr><td>F114</td><td>5-a、5-b</td><td>煞車 1 行程沒動作</td><td class="exists">✅ 有說明</td><td></td></tr>
+        <tr><td>F115</td><td>5-a、5-b</td><td>煞車 2 行程沒動作</td><td class="exists">✅ 有說明</td><td></td></tr>
+        <tr><td>F140</td><td>7-a、7-b</td><td>主機馬達溫度異常</td><td class="exists">✅ 有說明</td><td></td></tr>
+        <tr><td>F176</td><td>8-a、8-b</td><td>下行限位動作</td><td class="exists">✅ 有說明</td><td></td></tr>
+        <tr><td>F172</td><td>9-a、9-b</td><td>上行限位動作</td><td class="exists">✅ 有說明</td><td></td></tr>
+        <tr><td>E074</td><td>10-a</td><td>PG 絕對訊號異常</td><td class="exists">✅ 有說明</td><td>VFD-ED 故障碼</td></tr>
+        <tr><td>E043</td><td>10-b</td><td>PG 回授斷線</td><td class="exists">✅ 有說明</td><td>VFD-ED 故障碼</td></tr>
+        <tr><td>F147</td><td>11-a、11-b、11-c</td><td>主機與轎頂板通訊異常</td><td class="exists">✅ 有說明</td><td></td></tr>
+        <tr><td>F137</td><td>11-c、14-a</td><td>高壓安全迴路異常</td><td class="exists">✅ 有說明</td><td></td></tr>
+        <tr><td>185</td><td>14-c</td><td>所有 Input Off</td><td class="exists">✅ 有說明</td><td>故障原因不明</td></tr>
+        <tr style="background:#fff7ed"><td class="missing">1144</td><td>10-b</td><td>—</td><td class="missing">❌ 手冊無說明</td><td>需補齊</td></tr>
+        <tr style="background:#fff7ed"><td class="missing">1147</td><td>11-a/b/c/d、12-a/b</td><td>—</td><td class="missing">❌ 手冊無說明</td><td>需補齊</td></tr>
+        <tr style="background:#fff7ed"><td class="missing">1181</td><td>13-b、14-a/b/c、15-a</td><td>APS 讀頭遮蔽</td><td class="missing">❌ 手冊無說明</td><td>手持器有顯示，手冊未收錄</td></tr>
+        <tr style="background:#fff7ed"><td class="missing">1182</td><td>13-b</td><td>—</td><td class="missing">❌ 手冊無說明</td><td>需補齊</td></tr>
+        <tr style="background:#fff7ed"><td class="missing">209</td><td>13-b、14-c</td><td>EMOP 板偵測到異常</td><td class="missing">❌ 手冊無說明</td><td>手持器有顯示，手冊未收錄</td></tr>
+        <tr style="background:#fff7ed"><td class="missing">244</td><td>14-b</td><td>APS 位置錯誤</td><td class="missing">❌ 手冊無說明</td><td>手持器有顯示，手冊未收錄</td></tr>
+      </table>
+      <div style="margin-top:14px;padding:12px 16px;background:#fff7ed;border-radius:8px;font-size:13px;color:#92400e;">
+        ⚠️ 共 <b>6 種故障碼</b>（1144、1147、1181、1182、209、244）在 IED 手冊中無對應說明，需台達補齊文件。
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: 後續行動 -->
+  <div class="tab-panel" id="tab-actions">
+    <div class="chart-section">
+      <div class="chart-title">✅ 後續行動追蹤表</div>
+      <table class="action-table">
+        <tr><th width="60">項次</th><th>待辦事項</th><th width="130">負責方</th><th width="110">狀態</th><th width="110">預計時程</th></tr>
+        <tr>
+          <td>5</td>
+          <td>依偵測的錯誤次數按壓 Reset 清除（5-a 需 2 次，5-b 需 1 次）</td>
+          <td><span class="tag tag-dawei">大偉</span></td>
+          <td><span class="tag" style="background:#fef3c7;color:#d97706">文件確認</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>8 / 9</td>
+          <td>3LS、4LS 異常觸發立即停止並取消所有叫車，保持停止狀態鎖住，直至開關復歸與 Reset 清除</td>
+          <td><span class="tag tag-delta">台達</span><span class="tag tag-dawei">大偉</span></td>
+          <td><span class="tag" style="background:#fee2e2;color:#dc2626">程式修改</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>補齊 IED 手冊故障碼 1144 說明</td>
+          <td><span class="tag tag-delta">台達</span></td>
+          <td><span class="tag" style="background:#fef3c7;color:#d97706">待補文件</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>補齊 IED 手冊故障碼 1147 說明</td>
+          <td><span class="tag tag-delta">台達</span></td>
+          <td><span class="tag" style="background:#fef3c7;color:#d97706">待補文件</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>第三版電路加入 DU/PU 斷線後 APS 於門區持續門開（PDO 替代方案）</td>
+          <td><span class="tag tag-dawei">大偉</span></td>
+          <td><span class="tag" style="background:#dcfce7;color:#16a34a">✓ 已完成</span></td>
+          <td>完成        </tr>
+        <tr>
+          <td>12</td>
+          <td>補齊 IED 手冊故障碼 1147 說明；新增乘場通訊斷線相關故障碼</td>
+          <td><span class="tag tag-delta">台達</span></td>
+          <td><span class="tag" style="background:#fef3c7;color:#d97706">待補文件</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>補齊 IED 手冊故障碼 1181、1182、209 說明；新增 APS 相關故障碼</td>
+          <td><span class="tag tag-delta">台達</span></td>
+          <td><span class="tag" style="background:#fef3c7;color:#d97706">待補文件</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>14-b</td>
+          <td>APS 失效時電梯不應啟動，取消叫車並故障直至 APS 恢復（測試時須將 SMR 短路）</td>
+          <td><span class="tag tag-delta">台達</span></td>
+          <td><span class="tag" style="background:#fee2e2;color:#dc2626">程式修改</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>14-c</td>
+          <td>確認修改後行為是否符合電研要求（復電後依斷電前紀錄往頂底樓移動，參照 3LS/4LS 開門）</td>
+          <td><span class="tag tag-elec">電研</span><span class="tag tag-delta">台達</span></td>
+          <td><span class="tag" style="background:#dbeafe;color:#1d4ed8">待確認</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>補齊 IED 手冊故障碼 1181、244 說明；新增 APS 相關故障碼</td>
+          <td><span class="tag tag-delta">台達</span></td>
+          <td><span class="tag" style="background:#fef3c7;color:#d97706">待補文件</span></td>
+          <td>待定</td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>釐清 -15% 電壓下啟動失效原因（訊號/迴路），再次測試</td>
+          <td><span class="tag tag-delta">台達</span><span class="tag tag-dawei">大偉</span></td>
+          <td><span class="tag" style="background:#fef3c7;color:#d97706">6/10 再測</span></td>
+          <td><b>2026/06/10</b></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 5: 時間軸 -->
+  <div class="tab-panel" id="tab-timeline">
+    <div class="chart-section">
+      <div class="chart-title">🕐 測試事件時間軸</div>
+      <div class="timeline">
+
+        <div class="tl-item">
+          <div class="tl-dot pass"></div>
+          <div class="tl-content">
+            <div class="tl-date">2026.05.28</div>
+            <div class="tl-title">🔬 IES 樣機破壞性測試（初測）</div>
+            共 16 項測試，PASS 7 項，待討論 9 項。發現多項故障碼手冊缺漏及行為不一致問題。
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot pending"></div>
+          <div class="tl-content">
+            <div class="tl-date">2026.05.29</div>
+            <div class="tl-title">🔁 IES 樣機破壞性測試（複測）</div>
+            複測結果與初測一致，確認問題仍存在。整理問題檢討紀錄，彙整 8 大問題點：<br>
+            ① Brake-OFF 故障碼清除次數不一致<br>
+            ② 3LS/4LS 急停後叫車取消邏輯不一致<br>
+            ③ PG 斷線故障碼 1144 手冊無說明<br>
+            ④ CAN 通訊斷線故障碼 1147 手冊無說明<br>
+            ⑤ CAN 斷線後 PDO 無效安全疑慮<br>
+            ⑥ APS 相關故障碼 1181/1182/209/244 手冊無說明<br>
+            ⑦ APS 失效下電梯不應啟動<br>
+            ⑧ 電壓 -15% 系統無法運行不符內規
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot action"></div>
+          <div class="tl-content">
+            <div class="tl-date">2026.06.09</div>
+            <div class="tl-title">📩 問題回覆（台達 + 大偉）</div>
+            台達針對各問題提出說明與回覆：<br>
+            • 項次 5：說明 5-a/5-b 斷線時序差異，依次數 Reset 為對策<br>
+            • 項次 8：大偉提出對策：3LS/4LS 觸發立即取消所有叫車並鎖住<br>
+            • 項次 10~14：台達確認補齊 IED 手冊故障碼說明<br>
+            • 項次 11 PDO：大偉回覆第三版電路已加入替代方案<br>
+            • 項次 14-a：台達說明底樓自動降速邏輯及 APS 3 秒判斷機制<br>
+            • 項次 14-b：大偉對策：APS 失效不應啟動，需 SMR 短路測試<br>
+            • 項次 14-c：大偉對策：復電後依斷電前紀錄往頂底樓移動<br>
+            • 項次 16：台達說明控制迴路由 AVR 供電，需釐清啟動失效原因
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot action"></div>
+          <div class="tl-content">
+            <div class="tl-date">2026.06.10</div>
+            <div class="tl-title">🔧 項次 16 電壓變動再次測試</div>
+            台達人員到達，與大偉一同針對電壓 -15%（323V）啟動失效問題進行釐清與再測。<br>
+            重點確認：哪些訊號或迴路導致 AMC2/AMC3 啟動失效、煞車器未釋放原因。
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot future"></div>
+          <div class="tl-content">
+            <div class="tl-date">待定</div>
+            <div class="tl-title">📋 後續待辦事項</div>
+            • 台達補齊 IED 手冊故障碼說明（1144、1147、1181、1182、209、244）<br>
+            • 台達修改程式：3LS/4LS 急停立即取消叫車<br>
+            • 台達修改程式：APS 失效時不啟動<br>
+            • 電研確認 14-c 修改後行為是否符合要求<br>
+            • 項次 16 電壓測試結果確認
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .content -->
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  function toggleIssue(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.toggle-icon');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+</script>
+
+</body>
+</html>
